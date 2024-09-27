@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "487800877880",
+    "project_id": "tiktok-clone-app-daf34",
+    "storage_bucket": "tiktok-clone-app-daf34.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487800877880:android:dd5d8169571cc72b05c7cd",
+        "android_client_info": {
+          "package_name": "com.example.tiktok_tutorial"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDu1r7gnilvOgAhIi5taALjII9qZwZb4Cw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487800877880:android:ef1ff6731070599605c7cd",
+        "android_client_info": {
+          "package_name": "com.example.vidstar_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDu1r7gnilvOgAhIi5taALjII9qZwZb4Cw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

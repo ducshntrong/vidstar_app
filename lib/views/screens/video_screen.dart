@@ -25,12 +25,12 @@ class VideoScreen extends StatefulWidget {
 class _VideoScreenState extends State<VideoScreen> {
   final VideoController videoController = Get.put(VideoController(Get.find<NotificationService>()));
 
-  void showCommentBottomSheet(BuildContext context, String id) {
+  void showCommentBottomSheet(BuildContext context, String id, String uid) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return CommentBottomSheet(postId: id);
+        return CommentBottomSheet(postId: id, uid: uid);
       },
     );
   }
@@ -252,7 +252,7 @@ class _VideoScreenState extends State<VideoScreen> {
                           Column(
                             children: [
                               InkWell(
-                                onTap: () => showCommentBottomSheet(context, data.id),
+                                onTap: () => showCommentBottomSheet(context, data.id, data.uid),
                                 child: Image.asset(
                                   'assets/comments.png',
                                   height: 32,

@@ -26,7 +26,8 @@ class SearchControler extends GetxController {
         for (var elem in query.docs) {
           retVal.add(Video.fromSnap(elem));
         }
-        retVal.sort((a, b) => b.date.compareTo(a.date));
+        // Sắp xếp video theo lượt like từ cao đến thấp
+        retVal.sort((a, b) => b.likes.length.compareTo(a.likes.length));
 
         return retVal;
       }),

@@ -8,6 +8,7 @@ class Comment {
   String profilePhoto;
   String uid;
   String id;
+  String? parentId;
 
   Comment({
     required this.username,
@@ -17,6 +18,7 @@ class Comment {
     required this.profilePhoto,
     required this.uid,
     required this.id,
+    this.parentId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -27,6 +29,7 @@ class Comment {
         'profilePhoto': profilePhoto,
         'uid': uid,
         'id': id,
+        'parentId': parentId,
       };
 
   static Comment fromSnap(DocumentSnapshot snap) {
@@ -39,6 +42,8 @@ class Comment {
       profilePhoto: snapshot['profilePhoto'],
       uid: snapshot['uid'],
       id: snapshot['id'],
+      parentId: snapshot['parentId'],
     );
   }
 }
+

@@ -34,29 +34,35 @@ class CommentController extends GetxController {
           for (var element in query.docs) {
             retValue.add(Comment.fromSnap(element));
           }
+          // Sắp xếp theo datePublished giảm dần
+          retValue.sort((a, b) => b.datePublished.compareTo(a.datePublished));
           return retValue;
         },
       ),
     );
   }
 
-  postComment(String commentText) async {
+  Future<void> postComment(String commentText, {String? parentId}) async {
     try {
+      // Kiểm tra xem nội dung bình luận có rỗng không
       if (commentText.isNotEmpty) {
-        // Lấy tài liệu người dùng và ép kiểu
+        // Lấy thông tin người dùng
         DocumentSnapshot userDoc = await firestore
             .collection('users')
             .doc(authController.user.uid)
             .get();
+
         Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
 
-        var allDocs = await firestore
+        // Tạo ID bình luận mới
+        String commentId = firestore
             .collection('videos')
             .doc(_postId)
             .collection('comments')
-            .get();
-        int len = allDocs.docs.length;
+            .doc()
+            .id;
 
+        // Tạo một đối tượng Comment
         Comment comment = Comment(
           username: userData['name'],
           comment: commentText.trim(),
@@ -64,13 +70,16 @@ class CommentController extends GetxController {
           likes: [],
           profilePhoto: userData['profilePhoto'],
           uid: authController.user.uid,
-          id: 'Comment $len',
+          id: commentId,
+          parentId: parentId,
         );
+
+        // Lưu bình luận vào Firestore
         await firestore
             .collection('videos')
             .doc(_postId)
             .collection('comments')
-            .doc('Comment $len')
+            .doc(commentId)
             .set(comment.toJson());
 
         // Lấy ID của chủ video
@@ -80,26 +89,60 @@ class CommentController extends GetxController {
         if (authController.user.uid != videoOwnerId) {
           await notificationService.createNotification(
             Notifications(
-              id: 'Notification_${DateTime.now().millisecondsSinceEpoch}', // Tạo ID duy nhất
+              id: 'Notification_${DateTime.now().millisecondsSinceEpoch}',
               profileImage: userData['profilePhoto'],
               username: userData['name'],
-              content: " commented your video.",
+              content: " commented on your video.",
               date: DateTime.now(),
-              recipientId: videoOwnerId, // ID của chủ video
-              videoId: _postId, // ID video liên quan
-              isRead: false, // Mặc định là chưa đọc
+              recipientId: videoOwnerId,
+              videoId: _postId,
+              isRead: false,
               type: "comment",
-              senderId: authController.user.uid, // ID của người gửi thông báo
+              senderId: authController.user.uid,
             ),
           );
         }
 
+        // Nếu đây là bình luận trả lời, tạo thông báo cho người dùng của bình luận cha
+        if (parentId != null) {
+          DocumentSnapshot parentCommentDoc = await firestore
+              .collection('videos')
+              .doc(_postId)
+              .collection('comments')
+              .doc(parentId)
+              .get();
+
+          // Ép kiểu dữ liệu để tránh lỗi
+          Map<String, dynamic> parentCommentData = parentCommentDoc.data() as Map<String, dynamic>;
+          String parentUserId = parentCommentData['uid'];
+
+          if (authController.user.uid != parentUserId) {
+            await notificationService.createNotification(
+              Notifications(
+                id: 'Notification_${DateTime.now().millisecondsSinceEpoch}_reply',
+                profileImage: userData['profilePhoto'],
+                username: userData['name'],
+                content: " replied to your comment.",
+                date: DateTime.now(),
+                recipientId: parentUserId,
+                videoId: _postId,
+                isRead: false,
+                type: "reply",
+                senderId: authController.user.uid,
+              ),
+            );
+          }
+        }
+
+        // Cập nhật số lượng bình luận trong video
         DocumentSnapshot doc = await firestore.collection('videos').doc(_postId).get();
+        int commentCount = (doc.data()! as Map<String, dynamic>)['commentCount'] ?? 0;
         await firestore.collection('videos').doc(_postId).update({
-          'commentCount': (doc.data()! as Map<String, dynamic>)['commentCount'] + 1,
+          'commentCount': commentCount + 1,
         });
       }
     } catch (e) {
+      // Hiển thị thông báo lỗi nếu có
       Get.snackbar(
         'Error While Commenting',
         e.toString(),
@@ -170,6 +213,176 @@ class CommentController extends GetxController {
           ),
         );
       }
+    }
+  }
+
+  // deleteComment(String commentId) async {
+  //   try {
+  //     // Lấy thông tin bình luận để xác định người sở hữu bình luận
+  //     DocumentSnapshot commentDoc = await firestore
+  //         .collection('videos')
+  //         .doc(_postId)
+  //         .collection('comments')
+  //         .doc(commentId)
+  //         .get();
+  //
+  //     if (!commentDoc.exists) {
+  //       Get.snackbar('Error', 'Comment not found.');
+  //       return;
+  //     }
+  //
+  //     // Lấy ID của chủ video
+  //     String videoOwnerId = (await firestore.collection('videos').doc(_postId).get()).data()!['uid'];
+  //     String uid = authController.user.uid;
+  //
+  //     // Lấy tất cả bình luận con trước khi xóa bình luận cha
+  //     QuerySnapshot childCommentsSnapshot = await firestore
+  //         .collection('videos')
+  //         .doc(_postId)
+  //         .collection('comments')
+  //         .where('parentId', isEqualTo: commentId)
+  //         .get();
+  //
+  //     // Xóa tất cả bình luận con
+  //     for (var doc in childCommentsSnapshot.docs) {
+  //       await doc.reference.delete(); // Xóa bình luận con
+  //     }
+  //
+  //     // Xóa bình luận cha khỏi Firestore
+  //     await firestore
+  //         .collection('videos')
+  //         .doc(_postId)
+  //         .collection('comments')
+  //         .doc(commentId)
+  //         .delete();
+  //
+  //     // Cập nhật số lượng bình luận trong video
+  //     DocumentSnapshot videoDoc = await firestore.collection('videos').doc(_postId).get();
+  //     int currentCommentCount = (videoDoc.data()! as Map<String, dynamic>)['commentCount'] ?? 0;
+  //     await firestore.collection('videos').doc(_postId).update({
+  //       'commentCount': currentCommentCount - 1 - childCommentsSnapshot.docs.length, // Cập nhật số lượng bình luận
+  //     });
+  //
+  //     // Xóa thông báo liên quan
+  //     await notificationService.deleteNotification(
+  //         videoOwnerId, // ID của người sở hữu bình luận
+  //         uid, // ID của người xóa bình luận
+  //         "comment", // Loại thông báo
+  //         " commented your video." // Nội dung thông báo
+  //     );
+  //
+  //   } catch (e) {
+  //     // Hiển thị thông báo lỗi nếu có
+  //     Get.snackbar('Error While Deleting Comment', e.toString());
+  //   }
+  // }
+  deleteComment(String commentId) async {
+    try {
+      // Lấy thông tin bình luận để xác định người sở hữu bình luận
+      DocumentSnapshot commentDoc = await firestore
+          .collection('videos')
+          .doc(_postId)
+          .collection('comments')
+          .doc(commentId)
+          .get();
+
+      if (!commentDoc.exists) {
+        Get.snackbar('Error', 'Comment not found.');
+        return;
+      }
+
+      // Ép kiểu cho dữ liệu bình luận
+      Map<String, dynamic> commentData = commentDoc.data() as Map<String, dynamic>;
+      String commentOwnerId = commentData['uid']; // ID của người sở hữu bình luận
+
+      // Lấy ID của chủ video
+      String videoOwnerId = (await firestore.collection('videos').doc(_postId).get()).data()!['uid'];
+      var uid = authController.user.uid;
+
+      // Lấy tất cả bình luận con trước khi xóa bình luận cha
+      QuerySnapshot childCommentsSnapshot = await firestore
+          .collection('videos')
+          .doc(_postId)
+          .collection('comments')
+          .where('parentId', isEqualTo: commentId)
+          .get();
+
+      // Xóa tất cả bình luận con và thông báo liên quan
+      for (var doc in childCommentsSnapshot.docs) {
+        // Lấy thông tin bình luận con
+        Map<String, dynamic> childCommentData = doc.data() as Map<String, dynamic>;
+        String childCommentOwnerId = childCommentData['uid'];
+
+        // Xóa thông báo liên quan đến bình luận con
+        await notificationService.deleteNotification(
+            childCommentOwnerId, // ID của người sở hữu bình luận con
+            uid, // ID của người xóa bình luận
+            "reply", // Loại thông báo
+            " replied to your comment." // Nội dung thông báo
+        );
+
+        await doc.reference.delete(); // Xóa bình luận con
+      }
+
+      // Xóa bình luận cha khỏi Firestore
+      await firestore
+          .collection('videos')
+          .doc(_postId)
+          .collection('comments')
+          .doc(commentId)
+          .delete();
+
+      // Cập nhật số lượng bình luận trong video
+      DocumentSnapshot videoDoc = await firestore.collection('videos').doc(_postId).get();
+      int currentCommentCount = (videoDoc.data()! as Map<String, dynamic>)['commentCount'] ?? 0;
+      await firestore.collection('videos').doc(_postId).update({
+        'commentCount': currentCommentCount - 1 - childCommentsSnapshot.docs.length, // Cập nhật số lượng bình luận
+      });
+
+      // Xóa thông báo liên quan đến bình luận
+      if (uid != commentOwnerId) { // Kiểm tra xem người xóa không phải là chủ bình luận
+        await notificationService.deleteNotification(
+            commentOwnerId, // ID của người sở hữu bình luận
+            uid, // ID của người xóa bình luận
+            "comment", // Loại thông báo
+            " commented on your video." // Nội dung thông báo
+        );
+      }
+
+    } catch (e) {
+      // Hiển thị thông báo lỗi nếu có
+      Get.snackbar('Error While Deleting Comment', e.toString());
+    }
+  }
+
+  editComment(String commentId, String updatedCommentText) async {
+    try {
+      // Lấy thông tin bình luận từ Firestore
+      DocumentSnapshot commentDoc = await firestore
+          .collection('videos')
+          .doc(_postId)
+          .collection('comments')
+          .doc(commentId)
+          .get();
+
+      if (!commentDoc.exists) {
+        Get.snackbar('Error', 'Comment not found.');
+        return;
+      }
+
+      // Cập nhật nội dung bình luận
+      await firestore
+          .collection('videos')
+          .doc(_postId)
+          .collection('comments')
+          .doc(commentId)
+          .update({
+        'comment': updatedCommentText.trim(),
+        'datePublished': DateTime.now(), // Cập nhật thời gian nếu cần
+      });
+
+    } catch (e) {
+      Get.snackbar('Error While Editing Comment', e.toString());
     }
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/video.dart';
+import '../screens/profile_screen.dart';
 
 class CaptionWidget extends StatefulWidget {
   final Video video;
@@ -27,12 +28,23 @@ class _CaptionWidgetState extends State<CaptionWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text(
-              widget.video.username,
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+
+            InkWell(
+              onTap: () {
+                // Điều hướng đến trang cá nhân của người dùng
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ProfileScreen(uid: widget.video.uid),
+                  ),
+                );
+              },
+              child: Text(
+                widget.video.username,
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             // Hiện caption

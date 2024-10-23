@@ -99,7 +99,8 @@ class NotificationTile extends StatelessWidget {
 
     // Xử lý điều hướng dựa trên loại thông báo
     if (notification.type == 'like' || notification.type == 'comment'
-        || notification.type == 'likeComment' || notification.type == 'repost' ) {
+        || notification.type == 'likeComment' || notification.type == 'repost'
+        || notification.type == 'reply') {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => VideoScreen2(videoId: notification.videoId),
@@ -131,7 +132,7 @@ class NotificationTile extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 13,
                 ),
               ),
               Expanded(
@@ -139,7 +140,7 @@ class NotificationTile extends StatelessWidget {
                   notification.content,
                   style: const TextStyle(
                     color: Colors.grey,
-                    fontSize: 14,
+                    fontSize: 13,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
@@ -147,9 +148,15 @@ class NotificationTile extends StatelessWidget {
               ),
             ],
           ),
-          subtitle: Text(
-            notification.timeAgo,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          subtitle: Row(
+            children: [
+              const Icon(Icons.access_time, color: Colors.grey, size: 12), // Biểu tượng thời gian
+              const SizedBox(width: 4), // Khoảng cách giữa biểu tượng và thời gian
+              Text(
+                notification.timeAgo,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
           ),
           trailing: notification.isRead ? const Icon(Icons.check, color: Colors.green) : null,
         ),

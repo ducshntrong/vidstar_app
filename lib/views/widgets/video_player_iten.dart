@@ -14,7 +14,7 @@ class VideoPlayerItem extends StatefulWidget {
 
 class _VideoPlayerItemState extends State<VideoPlayerItem> {
   late VideoPlayerController videoPlayerController;
-  bool isPlaying = true; // Biến để theo dõi trạng thái phát
+  bool isPlaying = true;
 
   @override
   void initState() {
@@ -23,23 +23,31 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
       ..initialize().then((_) {
         videoPlayerController.play();
         videoPlayerController.setVolume(1);
+        setState(() {}); // Cập nhật để hiển thị video
       });
+
+    videoPlayerController.addListener(() {
+      if (videoPlayerController.value.position == videoPlayerController.value.duration) {
+        videoPlayerController.seekTo(Duration.zero);
+        videoPlayerController.play();
+      }
+    });
   }
 
   @override
   void dispose() {
-    super.dispose();
     videoPlayerController.dispose();
+    super.dispose();
   }
 
   void _togglePlayPause() {
     setState(() {
       if (videoPlayerController.value.isPlaying) {
         videoPlayerController.pause();
-        isPlaying = false; // Cập nhật trạng thái phát
+        isPlaying = false;
       } else {
         videoPlayerController.play();
-        isPlaying = true; // Cập nhật trạng thái phát
+        isPlaying = true;
       }
     });
   }
@@ -49,7 +57,7 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
     final size = MediaQuery.of(context).size;
 
     return GestureDetector(
-      onTap: _togglePlayPause, // Gọi hàm để dừng hoặc phát video khi nhấn vào màn hình
+      onTap: _togglePlayPause,
       child: Stack(
         children: [
           Container(
@@ -58,15 +66,22 @@ class _VideoPlayerItemState extends State<VideoPlayerItem> {
             decoration: const BoxDecoration(
               color: Colors.black,
             ),
-            child: VideoPlayer(videoPlayerController),
+            child: videoPlayerController.value.isInitialized ? FittedBox(
+              fit: BoxFit.contain, // Hoặc BoxFit.cover
+              child: SizedBox(
+                width: videoPlayerController.value.size.width,
+                height: videoPlayerController.value.size.height,
+                child: VideoPlayer(videoPlayerController),
+              ),
+            )
+                : const Center(child: SizedBox()),
           ),
-          // Hiển thị icon play/pause ở giữa màn hình chỉ khi video không đang phát
-          if (!isPlaying) // Kiểm tra trạng thái phát
+          if (!isPlaying)
             const Center(
               child: Icon(
                 Icons.play_arrow,
                 color: Colors.white70,
-                size: 64.0, // Kích thước biểu tượng
+                size: 64.0,
               ),
             ),
         ],

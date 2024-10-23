@@ -278,98 +278,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ],
                             ),
                           ),
-                          // video list
-                          // PageView để lướt qua video của người dùng và video đã thích
-                          // PageView để lướt qua video của người dùng và video đã thích
-                          // SizedBox(
-                          //   height: 450,
-                          //   child: Column(
-                          //     children: [
-                          //       // Hiển thị chỉ số trang hiện tại
-                          //       Padding(
-                          //         padding: const EdgeInsets.all(8.0),
-                          //         child: Row(
-                          //           mainAxisAlignment: MainAxisAlignment.center,
-                          //           children: [
-                          //             Icon(
-                          //               Icons.video_library,
-                          //               size: 30, // Kích thước biểu tượng
-                          //               color: _currentPage == 0 ? Colors.red : Colors.grey, // Thay đổi màu sắc
-                          //             ),
-                          //             const SizedBox(width: 8), // Khoảng cách giữa biểu tượng
-                          //             // Kiểm tra xem người dùng hiện tại có phải là chủ sở hữu không
-                          //             if (widget.uid == authController.user.uid) ...[
-                          //               Icon(
-                          //                 Icons.favorite,
-                          //                 size: 30, // Kích thước biểu tượng
-                          //                 color: _currentPage == 1 ? Colors.red : Colors.grey, // Thay đổi màu sắc
-                          //               ),
-                          //             ],
-                          //           ],
-                          //         ),
-                          //       ),
-                          //       Expanded(
-                          //         child: PageView.builder(
-                          //           controller: _pageController,
-                          //           itemCount: widget.uid == authController.user.uid ? 2 : 1,
-                          //           onPageChanged: (index) {
-                          //             setState(() {
-                          //               _currentPage = index; // Cập nhật trang hiện tại
-                          //             });
-                          //           },
-                          //           itemBuilder: (context, pageIndex) {
-                          //             List<String> thumbnails = pageIndex == 0
-                          //                 ? controller.user['thumbnails']
-                          //                 : controller.user['likedThumbnails'];
-                          //
-                          //             // Kiểm tra nếu thumbnails rỗng
-                          //             if (thumbnails == null || thumbnails.isEmpty) {
-                          //               return const Center(
-                          //                 child: Text(
-                          //                   "No videos available.",
-                          //                   style: TextStyle(fontSize: 18, color: Colors.grey),
-                          //                 ),
-                          //               );
-                          //             }
-                          //
-                          //             return GridView.builder(
-                          //               shrinkWrap: true,
-                          //               physics: const AlwaysScrollableScrollPhysics(),
-                          //               itemCount: thumbnails.length,
-                          //               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          //                 crossAxisCount: 2,
-                          //                 childAspectRatio: 1,
-                          //                 crossAxisSpacing: 5,
-                          //               ),
-                          //               itemBuilder: (context, index) {
-                          //                 String thumbnail = thumbnails[index];
-                          //                 String videoId = pageIndex == 0
-                          //                     ? controller.user['videoIds'][index]
-                          //                     : controller.user['likedVideoIds'][index];
-                          //
-                          //                 return GestureDetector(
-                          //                   onTap: () {
-                          //                     Navigator.of(context).push(
-                          //                       MaterialPageRoute(
-                          //                         builder: (context) => VideoScreen2(videoId: videoId),
-                          //                       ),
-                          //                     );
-                          //                   },
-                          //                   child: CachedNetworkImage(
-                          //                     imageUrl: thumbnail,
-                          //                     fit: BoxFit.cover,
-                          //                     placeholder: (context, url) => const CircularProgressIndicator(),
-                          //                     errorWidget: (context, url, error) => const Icon(Icons.error),
-                          //                   ),
-                          //                 );
-                          //               },
-                          //             );
-                          //           },
-                          //         ),
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
                           SizedBox(
                             height: 450,
                             child: Column(
@@ -380,55 +288,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(
-                                        Icons.video_library,
-                                        size: 27, // Kích thước biểu tượng
-                                        color: _currentPage == 0 ? Colors.white : Colors.grey, // Thay đổi màu sắc cho video
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Icon(
-                                        Icons.autorenew, // Biểu tượng cho video repost
-                                        size: 27,
-                                        color: _currentPage == 1 ? Colors.white : Colors.grey, // Thay đổi màu sắc cho video repost
-                                      ),
-                                      const SizedBox(width: 8),
-                                      // Kiểm tra xem người dùng hiện tại có phải là chủ sở hữu không
-                                      if (widget.uid == authController.user.uid) ...[
-                                        Icon(
-                                          Icons.favorite,
-                                          size: 27, // Kích thước biểu tượng
-                                          color: _currentPage == 2 ? Colors.white : Colors.grey, // Thay đổi màu sắc cho video yêu thích
-                                        ),
-                                      ],
+                                      _buildIcon(Icons.video_library, 0),
+                                      const SizedBox(width: 16),
+                                      _buildIcon(Icons.autorenew, 1),
+                                      const SizedBox(width: 16),
+                                      if (widget.uid == authController.user.uid)
+                                        _buildIcon(Icons.favorite, 2),
                                     ],
                                   ),
                                 ),
                                 Expanded(
                                   child: PageView.builder(
                                     controller: _pageController,
-                                    itemCount: widget.uid == authController.user.uid ? 3 : 2, // Cập nhật số trang
+                                    itemCount: widget.uid == authController.user.uid ? 3 : 2,
                                     onPageChanged: (index) {
                                       setState(() {
-                                        _currentPage = index; // Cập nhật trang hiện tại
+                                        _currentPage = index;
                                       });
                                     },
                                     itemBuilder: (context, pageIndex) {
                                       List<String> thumbnails;
                                       List<String> videoIds;
+                                      List<int> likeCounts;
 
                                       if (pageIndex == 0) {
                                         thumbnails = controller.user['thumbnails'];
                                         videoIds = controller.user['videoIds'];
+                                        likeCounts = controller.user['likesCounts'];
                                       } else if (pageIndex == 1) {
                                         thumbnails = controller.user['repostThumbnails'];
                                         videoIds = controller.user['repostVideoIds'];
-                                      } else { // Trang video repost
+                                        likeCounts = controller.user['repostLikesCounts'];
+                                      } else {
                                         thumbnails = controller.user['likedThumbnails'];
                                         videoIds = controller.user['likedVideoIds'];
+                                        likeCounts = controller.user['likedLikesCounts'];
                                       }
 
-                                      // Kiểm tra nếu thumbnails rỗng
-                                      if (thumbnails == null || thumbnails.isEmpty) {
+                                      if (thumbnails.isEmpty) {
                                         return const Center(
                                           child: Text(
                                             "No videos available.",
@@ -444,11 +341,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 2,
                                           childAspectRatio: 1,
-                                          crossAxisSpacing: 5,
                                         ),
                                         itemBuilder: (context, index) {
                                           String thumbnail = thumbnails[index];
                                           String videoId = videoIds[index];
+                                          int likeCount = likeCounts[index];
 
                                           return GestureDetector(
                                             onTap: () {
@@ -458,11 +355,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 ),
                                               );
                                             },
-                                            child: CachedNetworkImage(
-                                              imageUrl: thumbnail,
-                                              fit: BoxFit.cover,
-                                              placeholder: (context, url) => const CircularProgressIndicator(),
-                                              errorWidget: (context, url, error) => const Icon(Icons.error),
+                                            child: Card(
+                                              elevation: 4, // Thêm hiệu ứng bóng
+                                              child: Stack(
+                                                children: [
+                                                  AspectRatio(
+                                                    aspectRatio: 1 / 1, // Tùy chỉnh tỷ lệ khung hình theo nhu cầu
+                                                    child: ClipRRect(
+                                                      child: CachedNetworkImage(
+                                                        imageUrl: thumbnail,
+                                                        fit: BoxFit.cover,
+                                                        placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                                                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    bottom: 2,
+                                                    left: 5,
+                                                    child: Row(
+                                                      children: [
+                                                        const Icon(
+                                                          Icons.favorite_border,
+                                                          size: 25,
+                                                        ),
+                                                        const SizedBox(width: 4),
+                                                        Text(
+                                                          likeCount.toString(),
+                                                          style: const TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 13,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           );
                                         },
@@ -482,5 +411,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           );
         });
+  }
+  Widget _buildIcon(IconData icon, int index) {
+    return Container(
+      decoration: BoxDecoration(
+        color: _currentPage == index ? Colors.red : Colors.transparent,
+        borderRadius: BorderRadius.circular(30), // Bo góc cho icon
+        border: Border.all(
+          color: _currentPage == index ? Colors.red : Colors.grey,
+          width: 2,
+        ),
+      ),
+      padding: const EdgeInsets.all(8),
+      child: Icon(
+        icon,
+        size: 27,
+        color: _currentPage == index ? Colors.white : Colors.grey,
+      ),
+    );
   }
 }

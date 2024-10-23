@@ -13,7 +13,7 @@ class Video {
   String videoUrl;
   String thumbnail;
   String profilePhoto;
-  DateTime date; // Thêm trường date
+  DateTime date;
 
   Video({
     required this.username,

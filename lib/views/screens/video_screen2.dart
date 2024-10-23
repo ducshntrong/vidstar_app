@@ -211,7 +211,7 @@ class _VideoScreenState extends State<VideoScreen2> {
     return Column(
       children: [
         InkWell(
-          onTap: () => showCommentBottomSheet(context, data.id), // Gọi hàm hiển thị BottomSheet
+          onTap: () => showCommentBottomSheet(context, data.id, data.uid), // Gọi hàm hiển thị BottomSheet
           child: Image.asset(
             'assets/comments.png',
             height: 32,
@@ -252,12 +252,12 @@ class _VideoScreenState extends State<VideoScreen2> {
     );
   }
 
-  void showCommentBottomSheet(BuildContext context, String id) {
+  void showCommentBottomSheet(BuildContext context, String id, String uid) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return CommentBottomSheet(postId: id);
+        return CommentBottomSheet(postId: id, uid: uid);
       },
     );
   }

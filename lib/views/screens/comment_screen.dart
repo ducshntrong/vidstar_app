@@ -1,15 +1,23 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:vidstar_app/constants.dart';
 import 'package:vidstar_app/controllers/comment_controller.dart';
 import 'package:timeago/timeago.dart' as tago;
+import 'package:vidstar_app/views/screens/profile_screen.dart';
 
+import '../../models/comment.dart';
 import '../../service/NotificationService.dart';
+import '../widgets/CommentWidget.dart';
 
 class CommentBottomSheet extends StatefulWidget {
   final String postId;
+  final String uid;
 
-  const CommentBottomSheet({Key? key, required this.postId}) : super(key: key);
+  const CommentBottomSheet({Key? key, required this.postId,required this.uid}) : super(key: key);
 
   @override
   _CommentBottomSheetState createState() => _CommentBottomSheetState();
@@ -19,18 +27,144 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
   final TextEditingController _commentController = TextEditingController();
   final NotificationService notificationService = Get.find<NotificationService>();
   late final CommentController commentController;
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode(); // Thêm FocusNode
+  String? replyingToCommentId;
 
   @override
   void initState() {
     super.initState();
     commentController = Get.put(CommentController(notificationService));
     commentController.updatePostId(widget.postId);
+
+    // Lắng nghe sự kiện focus
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        setState(() {
+          replyingToCommentId = null; // Đặt lại trạng thái khi bàn phím bị đóng
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
-    _commentController.dispose(); // Giải phóng controller khi không còn sử dụng
+    _commentController.dispose();
+    _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  // Hàm để hiển thị hộp thoại tùy chọn
+  void showCommentOptions(BuildContext context, Comment comment) {
+    final isMyComment = comment.uid == authController.user.uid; // Kiểm tra uid của bình luận
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.copy),
+                title: const Text('Copy'),
+                onTap: () {
+                  // Sao chép nội dung bình luận vào clipboard
+                  Clipboard.setData(ClipboardData(text: comment.comment));
+                  Get.snackbar('Copied', 'Comment copied to clipboard');
+                  Navigator.pop(context);
+                },
+              ),
+              // Hiển thị tùy chọn "Edit" và "Delete" nếu đó là bình luận của người dùng
+              if (isMyComment) ...[
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Edit'),
+                  onTap: () {
+                    Navigator.pop(context); // Đóng bottom sheet trước
+                    _showEditDialog(context, comment);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete),
+                  title: const Text('Delete'),
+                  onTap: () {
+                    // Xử lý xóa bình luận
+                    commentController.deleteComment(comment.id);
+                    Navigator.pop(context);
+                  },
+                ),
+              ] else ...[
+                ListTile(
+                  leading: const Icon(Icons.report),
+                  title: const Text('Report'),
+                  onTap: () {
+                    // Xử lý báo cáo bình luận
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+  void _showEditDialog(BuildContext context, Comment comment) {
+    final TextEditingController _editController = TextEditingController(text: comment.comment);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.grey[900], // Màu nền tối
+          title: const Text(
+            'Edit Comment',
+            style: TextStyle(color: Colors.white), // Màu chữ trắng
+          ),
+          content: Container(
+            width: double.maxFinite, // Chiều rộng tối đa
+            child: TextField(
+              controller: _editController,
+              style: const TextStyle(color: Colors.white), // Màu chữ
+              decoration: InputDecoration(
+                hintText: 'Enter your comment',
+                hintStyle: TextStyle(color: Colors.grey[400]), // Màu chữ nhạt
+                filled: true,
+                fillColor: Colors.grey[800], // Màu nền cho TextField
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.all(16.0), // Padding cho TextField
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel', style: TextStyle(color: Colors.redAccent)), // Màu chữ đỏ cho Cancel
+            ),
+            TextButton(
+              onPressed: () {
+                final updatedComment = _editController.text.trim();
+                if (updatedComment.isNotEmpty) {
+                  commentController.editComment(comment.id, updatedComment);
+                } else {
+                  Get.snackbar('Error', 'Comment cannot be empty');
+                }
+                Navigator.pop(context); // Đóng dialog
+              },
+              child: const Text('Save', style: TextStyle(color: Colors.blueAccent)), // Màu chữ xanh cho Save
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -55,7 +189,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white),
                   onPressed: () {
-                    Navigator.of(context).pop(); // Đóng BottomSheet
+                    Navigator.of(context).pop();
                   },
                 ),
               ],
@@ -75,77 +209,61 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
               }
 
               return ListView.builder(
+                controller: _scrollController,
                 shrinkWrap: true,
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: commentController.comments.length,
                 itemBuilder: (context, index) {
                   final comment = commentController.comments[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.black,
-                      backgroundImage: NetworkImage(comment.profilePhoto),
-                    ),
-                    title: Row(
-                      children: [
-                        Text(
-                          "${comment.username}  ",
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.red,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            comment.comment,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                          ),
-                        ),
-                      ],
-                    ),
-                    subtitle: Row(
-                      children: [
-                        Text(
-                          tago.format(comment.datePublished.toDate()),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          '${comment.likes.length} likes',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    trailing: InkWell(
-                      onTap: () => commentController.likeComment(comment.id),
+
+                  if (comment.parentId == null || comment.parentId!.isEmpty) {
+                    return GestureDetector(
+                      onLongPress: () {
+                        HapticFeedback.mediumImpact();
+                        showCommentOptions(context, comment); // Bình luận cha
+                      },
                       child: Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: Icon(
-                          Icons.favorite,
-                          size: 25,
-                          color: comment.likes.contains(authController.user.uid)
-                              ? Colors.red
-                              : Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CommentWidget(
+                              username: comment.username,
+                              profilePhoto: comment.profilePhoto,
+                              comment: comment.comment,
+                              datePublished: comment.datePublished.toDate(),
+                              onReply: () {
+                                setState(() {
+                                  replyingToCommentId = comment.id;
+                                  _commentController.clear(); // Xóa nội dung trước đó
+                                });
+                                _focusNode.requestFocus();
+                                Future.delayed(Duration(milliseconds: 100), () {
+                                  _scrollController.animateTo(
+                                    _scrollController.position.maxScrollExtent,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                  );
+                                });
+                              },
+                              onLike: () => commentController.likeComment(comment.id),
+                              uid: comment.uid,
+                              likes: List<String>.from(comment.likes),
+                              authorId: widget.uid,
+                            ),
+                            buildReplies(comment.id), // Hiển thị bình luận con
+                          ],
                         ),
                       ),
-                    ),
-                  );
+                    );
+                  }
+
+                  return SizedBox.shrink(); // Không hiển thị nếu không phải bình luận cha
                 },
               );
             }),
           ),
+
           Padding(
             padding: const EdgeInsets.all(8.0).copyWith(
               bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -168,13 +286,14 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   Expanded(
                     child: TextField(
                       controller: _commentController,
+                      focusNode: _focusNode,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.white,
                       ),
-                      decoration: const InputDecoration(
-                        hintText: 'Write a comment...',
-                        hintStyle: TextStyle(
+                      decoration: InputDecoration(
+                        hintText: replyingToCommentId != null ? 'Replying to comment...' : 'Write a comment...',
+                        hintStyle: const TextStyle(
                           color: Colors.grey,
                         ),
                         border: InputBorder.none,
@@ -185,7 +304,14 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   GestureDetector(
                     onTap: () {
                       if (_commentController.text.isNotEmpty) {
-                        commentController.postComment(_commentController.text);
+                        if (replyingToCommentId != null) {
+                          commentController.postComment(_commentController.text, parentId: replyingToCommentId);
+                          setState(() {
+                            replyingToCommentId = null; // Reset ID sau khi gửi
+                          });
+                        } else {
+                          commentController.postComment(_commentController.text);
+                        }
                         _commentController.clear();
                       }
                     },
@@ -208,12 +334,89 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 10),
+                  // Chỉ hiển thị nút "Cancel" khi đang trả lời bình luận
+                  if (replyingToCommentId != null)
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          replyingToCommentId = null; // Hủy trả lời
+                          _commentController.clear(); // Xóa nội dung
+                        });
+                        _focusNode.unfocus(); // Bỏ focus khỏi TextField
+                      },
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
           ),
+
         ],
       ),
     );
   }
+
+  Widget buildReplies(String commentId) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: firestore
+          .collection('videos')
+          .doc(widget.postId)
+          .collection('comments')
+          .where('parentId', isEqualTo: commentId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return SizedBox.shrink();
+        }
+        List<Comment> replies = snapshot.data!.docs.map((doc) => Comment.fromSnap(doc)).toList();
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: replies.length,
+          itemBuilder: (context, index) {
+            Comment reply = replies[index];
+            return GestureDetector(
+              onLongPress: () {
+                HapticFeedback.mediumImpact();
+                showCommentOptions(context, reply); // Truyền bình luận con
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(left: 40.0),
+                child: CommentWidget(
+                  username: reply.username,
+                  profilePhoto: reply.profilePhoto,
+                  comment: reply.comment,
+                  datePublished: reply.datePublished.toDate(),
+                  onReply: () {
+                    replyingToCommentId = reply.id;
+                    _focusNode.requestFocus(); // Yêu cầu focus cho TextField
+                    Future.delayed(Duration(milliseconds: 100), () {
+                      _scrollController.animateTo(
+                        _scrollController.position.maxScrollExtent,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    });
+                  },
+                  onLike: () => commentController.likeComment(reply.id),
+                  uid: reply.uid,
+                  likes: List<String>.from(reply.likes),
+                  isReply: true,
+                  authorId: widget.uid,
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
 }

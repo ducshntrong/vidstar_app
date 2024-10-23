@@ -72,83 +72,17 @@ class ProfileController extends GetxController {
     }
   }
 
-  // Future<void> getUserData() async {
-  //   try {
-  //     List<String> thumbnails = [];
-  //     List<String> videoIds = []; // Danh sách lưu trữ video ID
-  //
-  //     // Lấy video của người dùng
-  //     var myVideos = await firestore
-  //         .collection('videos')
-  //         .where('uid', isEqualTo: _uid.value)
-  //         .get();
-  //
-  //     for (var videoDoc in myVideos.docs) {
-  //       thumbnails.add((videoDoc.data() as Map<String, dynamic>)['thumbnail']);
-  //       videoIds.add(videoDoc.id); // Lưu video ID
-  //     }
-  //
-  //     // Lấy thông tin người dùng
-  //     DocumentSnapshot userDoc = await firestore.collection('users').doc(_uid.value).get();
-  //     if (!userDoc.exists) {
-  //       throw Exception("User does not exist");
-  //     }
-  //     final userData = userDoc.data()! as Map<String, dynamic>;
-  //
-  //     String name = userData['name'] ?? 'Unknown';
-  //     String profilePhoto = userData['profilePhoto'] ?? '';
-  //     int likes = 0;
-  //
-  //     // Tính tổng số lượt thích
-  //     for (var item in myVideos.docs) {
-  //       likes += (item.data()['likes'] as List).length;
-  //     }
-  //
-  //     // Lấy số lượng người theo dõi và đang theo dõi
-  //     var followerDoc = await firestore
-  //         .collection('users')
-  //         .doc(_uid.value)
-  //         .collection('followers')
-  //         .get();
-  //     var followingDoc = await firestore
-  //         .collection('users')
-  //         .doc(_uid.value)
-  //         .collection('following')
-  //         .get();
-  //
-  //     // Cập nhật thông tin người dùng
-  //     _user.value = {
-  //       'followers': followerDoc.docs.length.toString(),
-  //       'following': followingDoc.docs.length.toString(),
-  //       'isFollowing': await _isFollowing(),
-  //       'likes': likes.toString(),
-  //       'profilePhoto': profilePhoto,
-  //       'name': name,
-  //       'thumbnails': thumbnails,
-  //       'videoIds': videoIds, // Thêm videoIds vào user
-  //       'likedThumbnails': [], // Khởi tạo giá trị mặc định
-  //       'likedVideoIds': [], // Khởi tạo giá trị mặc định
-  //     };
-  //
-  //     // Cập nhật likedThumbnails và likedVideoIds từ getLikedVideos
-  //     if (_user.value['likedThumbnails'] != null) {
-  //       _user.value['likedThumbnails'] = await _getLikedThumbnails(); // Lấy liked thumbnails
-  //     }
-  //     if (_user.value['likedVideoIds'] != null) {
-  //       _user.value['likedVideoIds'] = await _getLikedVideoIds(); // Lấy liked video IDs
-  //     }
-  //
-  //     update();
-  //   } catch (e) {
-  //     print("Error fetching user data: $e");
-  //   }
-  // }
   Future<void> getUserData() async {
     try {
       List<String> thumbnails = [];
-      List<String> videoIds = []; // Danh sách video ID
-      List<String> repostThumbnails = []; // Danh sách thumbnail video đã repost
-      List<String> repostVideoIds = []; // Danh sách video ID đã repost
+      List<String> videoIds = [];
+      List<int> likesCounts = []; // Danh sách lưu số lượt thích cho từng video
+      List<String> repostThumbnails = [];
+      List<String> repostVideoIds = [];
+      List<int> repostLikesCounts = []; // Danh sách lưu số lượt thích cho video đã repost
+      List<String> likedThumbnails = [];
+      List<String> likedVideoIds = [];
+      List<int> likedLikesCounts = []; // Danh sách lưu số lượt thích cho video đã thích
 
       // Lấy video của người dùng
       var myVideos = await firestore
@@ -159,6 +93,10 @@ class ProfileController extends GetxController {
       for (var videoDoc in myVideos.docs) {
         thumbnails.add((videoDoc.data() as Map<String, dynamic>)['thumbnail']);
         videoIds.add(videoDoc.id); // Lưu video ID
+
+        // Lấy số lượt thích cho video
+        int likeCount = (videoDoc.data()['likes'] as List).length;
+        likesCounts.add(likeCount); // Thêm số lượt thích vào danh sách
       }
 
       // Lấy thông tin người dùng
@@ -175,6 +113,22 @@ class ProfileController extends GetxController {
         if (repostedVideoDoc.exists) {
           repostThumbnails.add((repostedVideoDoc.data() as Map<String, dynamic>)['thumbnail']);
           repostVideoIds.add(repostedVideoDoc.id); // Lưu video ID đã repost
+
+          // Lấy số lượt thích cho video đã repost
+          int repostLikeCount = ((repostedVideoDoc.data() as Map<String, dynamic>)['likes'] as List).length;
+          repostLikesCounts.add(repostLikeCount);
+        }
+      }
+
+      // Lấy video đã thích
+      likedThumbnails = await _getLikedThumbnails();
+      likedVideoIds = await _getLikedVideoIds();
+
+      for (String videoId in likedVideoIds) {
+        DocumentSnapshot likedVideoDoc = await firestore.collection('videos').doc(videoId).get();
+        if (likedVideoDoc.exists) {
+          int likedLikeCount = ((likedVideoDoc.data() as Map<String, dynamic>)['likes'] as List).length;
+          likedLikesCounts.add(likedLikeCount);
         }
       }
 
@@ -209,11 +163,14 @@ class ProfileController extends GetxController {
         'profilePhoto': profilePhoto,
         'name': name,
         'thumbnails': thumbnails,
-        'videoIds': videoIds, // Thêm videoIds vào user
-        'likedThumbnails': await _getLikedThumbnails(), // Lấy liked thumbnails
-        'likedVideoIds': await _getLikedVideoIds(), // Lấy liked video IDs
-        'repostThumbnails': repostThumbnails, // Thêm thumbnail video đã repost
-        'repostVideoIds': repostVideoIds, // Thêm video ID đã repost
+        'videoIds': videoIds,
+        'likesCounts': likesCounts,
+        'repostThumbnails': repostThumbnails,
+        'repostVideoIds': repostVideoIds,
+        'repostLikesCounts': repostLikesCounts, // Số lượt thích cho video đã repost
+        'likedThumbnails': likedThumbnails,
+        'likedVideoIds': likedVideoIds,
+        'likedLikesCounts': likedLikesCounts, // Số lượt thích cho video đã thích
       };
 
       update(); // Cập nhật UI

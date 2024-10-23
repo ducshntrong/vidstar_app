@@ -218,7 +218,7 @@ class CommentController extends GetxController {
 
   deleteComment(String commentId) async {
     try {
-      // Lấy thông tin bình luận để xác định người sở hữu bình luận
+      // Lấy thông tin bình luận để xác định người sở hữu bình luậns
       DocumentSnapshot commentDoc = await firestore
           .collection('videos')
           .doc(_postId)

@@ -216,66 +216,6 @@ class CommentController extends GetxController {
     }
   }
 
-  // deleteComment(String commentId) async {
-  //   try {
-  //     // Lấy thông tin bình luận để xác định người sở hữu bình luận
-  //     DocumentSnapshot commentDoc = await firestore
-  //         .collection('videos')
-  //         .doc(_postId)
-  //         .collection('comments')
-  //         .doc(commentId)
-  //         .get();
-  //
-  //     if (!commentDoc.exists) {
-  //       Get.snackbar('Error', 'Comment not found.');
-  //       return;
-  //     }
-  //
-  //     // Lấy ID của chủ video
-  //     String videoOwnerId = (await firestore.collection('videos').doc(_postId).get()).data()!['uid'];
-  //     String uid = authController.user.uid;
-  //
-  //     // Lấy tất cả bình luận con trước khi xóa bình luận cha
-  //     QuerySnapshot childCommentsSnapshot = await firestore
-  //         .collection('videos')
-  //         .doc(_postId)
-  //         .collection('comments')
-  //         .where('parentId', isEqualTo: commentId)
-  //         .get();
-  //
-  //     // Xóa tất cả bình luận con
-  //     for (var doc in childCommentsSnapshot.docs) {
-  //       await doc.reference.delete(); // Xóa bình luận con
-  //     }
-  //
-  //     // Xóa bình luận cha khỏi Firestore
-  //     await firestore
-  //         .collection('videos')
-  //         .doc(_postId)
-  //         .collection('comments')
-  //         .doc(commentId)
-  //         .delete();
-  //
-  //     // Cập nhật số lượng bình luận trong video
-  //     DocumentSnapshot videoDoc = await firestore.collection('videos').doc(_postId).get();
-  //     int currentCommentCount = (videoDoc.data()! as Map<String, dynamic>)['commentCount'] ?? 0;
-  //     await firestore.collection('videos').doc(_postId).update({
-  //       'commentCount': currentCommentCount - 1 - childCommentsSnapshot.docs.length, // Cập nhật số lượng bình luận
-  //     });
-  //
-  //     // Xóa thông báo liên quan
-  //     await notificationService.deleteNotification(
-  //         videoOwnerId, // ID của người sở hữu bình luận
-  //         uid, // ID của người xóa bình luận
-  //         "comment", // Loại thông báo
-  //         " commented your video." // Nội dung thông báo
-  //     );
-  //
-  //   } catch (e) {
-  //     // Hiển thị thông báo lỗi nếu có
-  //     Get.snackbar('Error While Deleting Comment', e.toString());
-  //   }
-  // }
   deleteComment(String commentId) async {
     try {
       // Lấy thông tin bình luận để xác định người sở hữu bình luận
@@ -340,13 +280,39 @@ class CommentController extends GetxController {
       });
 
       // Xóa thông báo liên quan đến bình luận
-      if (uid != commentOwnerId) { // Kiểm tra xem người xóa không phải là chủ bình luận
+      if (uid != videoOwnerId) { // Kiểm tra xem người xóa không phải là chủ video
         await notificationService.deleteNotification(
-            commentOwnerId, // ID của người sở hữu bình luận
+            videoOwnerId, // ID của người sở hữu video
             uid, // ID của người xóa bình luận
             "comment", // Loại thông báo
             " commented on your video." // Nội dung thông báo
         );
+      }
+
+      // Xóa thông báo liên quan đến bình luận trả lời
+      if (commentData['parentId'] != null) {
+        // Nếu bình luận này là bình luận trả lời, lấy ID của bình luận cha
+        String parentId = commentData['parentId'];
+        DocumentSnapshot parentCommentDoc = await firestore
+            .collection('videos')
+            .doc(_postId)
+            .collection('comments')
+            .doc(parentId)
+            .get();
+
+        if (parentCommentDoc.exists) {
+          Map<String, dynamic> parentCommentData = parentCommentDoc.data() as Map<String, dynamic>;
+          String parentUserId = parentCommentData['uid'];
+
+          if (uid != parentUserId) {
+            await notificationService.deleteNotification(
+                parentUserId, // ID của người sở hữu bình luận cha
+                uid, // ID của người xóa bình luận
+                "reply", // Loại thông báo
+                " replied to your comment." // Nội dung thông báo
+            );
+          }
+        }
       }
 
     } catch (e) {

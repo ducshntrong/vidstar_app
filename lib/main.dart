@@ -8,6 +8,7 @@ import 'package:vidstar_app/service/NotificationService.dart';
 import 'package:vidstar_app/views/screens/auth/login_screen.dart';
 import 'package:vidstar_app/views/screens/auth/signup_screen.dart';
 
+import 'controllers/chat_controller.dart';
 import 'controllers/video_controller.dart';
 
 void main() async {
@@ -16,6 +17,7 @@ void main() async {
 
   // Đăng ký AuthController
   Get.put(AuthController());
+  Get.put(ChatController());
 
   // Đăng ký NotificationService
   Get.put(NotificationService(FirebaseFirestore.instance));

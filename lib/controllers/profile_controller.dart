@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:vidstar_app/constants.dart';
 import 'package:vidstar_app/controllers/video_controller.dart';
 import '../models/notification.dart';
+import '../models/user.dart';
 import '../service/NotificationService.dart';
 
 import 'auth_controller.dart';
@@ -30,6 +31,24 @@ class ProfileController extends GetxController {
     getUserData();
     getFollowers();
     getFollowing();
+    getUserFromUID(uid);
+  }
+
+  final Rx<User> user2 = User(uid: '', name: 'Unknown', email: '', profilePhoto: '').obs;
+
+  // Phương thức lấy người dùng từ UID
+  void getUserFromUID(String uid) async {
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    if (userDoc.exists) {
+      user2.value = User.fromSnap(userDoc);
+    } else {
+      user2.value = User(
+        uid: '',
+        name: 'Unknown',
+        profilePhoto: '',
+        email: '',
+      );
+    }
   }
 
   // Phương thức để lấy danh sách followers

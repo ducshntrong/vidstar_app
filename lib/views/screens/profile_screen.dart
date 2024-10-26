@@ -5,8 +5,10 @@ import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/instance_manager.dart';
 import 'package:vidstar_app/constants.dart';
 import 'package:vidstar_app/controllers/profile_controller.dart';
+import 'package:vidstar_app/views/screens/inbox/chat_screen.dart';
 import 'package:vidstar_app/views/screens/update_screen.dart';
 import 'package:vidstar_app/views/screens/video_screen2.dart';
+import '../../models/user.dart';
 import '../../service/NotificationService.dart';
 import 'follower_screen.dart';
 import 'following_screen.dart';
@@ -24,7 +26,6 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final NotificationService notificationService = Get.find<NotificationService>();
-
   // Khởi tạo ProfileController với NotificationService
   late final ProfileController profileController;
 
@@ -42,6 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     profileController = ProfileController(notificationService);
     profileController.updateUserId(widget.uid);
+    profileController.getUserFromUID(widget.uid);
   }
 
   @override
@@ -60,6 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: CircularProgressIndicator(),
             );
           }
+          final user = controller.user2.value;
           // Kiểm tra xem người dùng hiện tại có phải là chủ sở hữu không
           bool isCurrentUser = widget.uid == authController.user.uid;
           return Scaffold(
@@ -73,9 +76,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   )
                 else
                   IconButton(
-                    icon: const Icon(Icons.more_horiz),
-                    onPressed: () {},
-                  ) // Nếu không phải, hiển thị biểu tượng khác
+                    icon: const Icon(Icons.more_vert),
+                    onPressed: () {
+                    },
+                  )
               ],
               title: Center(
                 child: Text(
@@ -234,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     backgroundColor: widget.uid == authController.user.uid
                                         ? const Color(0xFF565454) // Màu cho Sign Out
                                         : controller.user['isFollowing']
-                                        ? const Color(0xFF565454) // Màu cho UnFollow
+                                        ? const Color(0xFF565454) // Màu cho Unfollow
                                         : const Color(0xFFEE104C), // Màu cho Follow
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10), // Bo góc
@@ -252,29 +256,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   ),
                                 ),
-                                // Kiểm tra điều kiện trước khi thêm nút thứ hai
-                                if (widget.uid == authController.user.uid) ...[
-                                  SizedBox(width: 10), // Khoảng cách giữa hai nút
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Get.to(() => UpdateScreen()); // Chuyển đến trang UpdateScreen
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      foregroundColor: Colors.white,
-                                      backgroundColor: const Color(0xFF565454), // Màu cho nút thứ hai
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10), // Bo góc
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'Edit Profile', // Text cho nút thứ hai
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                SizedBox(width: 10), // Khoảng cách giữa hai nút
+                                ElevatedButton(
+                                  onPressed: () {
+                                    if (widget.uid == authController.user.uid) {
+                                      // Nếu là người dùng hiện tại, chuyển đến trang UpdateScreen
+                                      Get.to(() => UpdateScreen());
+                                    } else {
+                                      // Nếu không phải, thực hiện chức năng gửi tin nhắn
+                                      // Thay đổi dòng dưới đây để mở màn hình gửi tin nhắn
+                                      Get.to(() => ChatScreen(user: user)); // Giả sử ChatScreen là màn hình gửi tin nhắn
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: const Color(0xFF565454), // Màu cho nút
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10), // Bo góc
                                     ),
                                   ),
-                                ],
+                                  child: Text(
+                                    widget.uid == authController.user.uid
+                                        ? 'Edit Profile' // Nếu là người dùng, hiển thị nút Edit Profile
+                                        : 'Message', // Nếu không phải, hiển thị nút Message
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

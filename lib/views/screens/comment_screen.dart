@@ -298,6 +298,9 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                         ),
                         border: InputBorder.none,
                       ),
+                      keyboardType: TextInputType.multiline, // Cho phép nhập nhiều dòng
+                      maxLines: null, // Cho phép không giới hạn dòng
+                      minLines: 1, // Số dòng tối thiểu
                     ),
                   ),
                   const SizedBox(width: 10),

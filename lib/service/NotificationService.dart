@@ -62,4 +62,22 @@ class NotificationService {
       print("Error marking notification as read: $e");
     }
   }
+
+  Stream<List<Notifications>> getNotificationsStream(String recipientId) {
+    return firestore
+        .collection('notifications')
+        .where('recipientId', isEqualTo: recipientId)
+        .snapshots() //Sd snapshots() để lắng nghe các thay đổi trong bộ sưu tập thông báo.
+        .map((snapshot) {
+      // Chuyển đổi docs thành danh sách Notifications
+      List<Notifications> notifications = snapshot.docs
+          .map((doc) => Notifications.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+
+      // Sắp xếp danh sách thông báo theo thời gian (mới nhất trước)
+      notifications.sort((a, b) => b.date.compareTo(a.date));
+
+      return notifications; // Trả về danh sách đã sắp xếp
+    });
+  }
 }

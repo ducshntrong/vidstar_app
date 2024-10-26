@@ -19,61 +19,41 @@ class SearchControler extends GetxController {
   }
 
   void _getAllVideos() async {
-    // Lấy tất cả video từ Firestore
     _searchedVideos.bindStream(
       firestore.collection('videos').snapshots().map((QuerySnapshot query) {
-        List<Video> retVal = [];
-        for (var elem in query.docs) {
-          retVal.add(Video.fromSnap(elem));
-        }
-        // Sắp xếp video theo lượt like từ cao đến thấp
-        retVal.sort((a, b) => b.likes.length.compareTo(a.likes.length));
-
+        List<Video> retVal = query.docs.map((elem) => Video.fromSnap(elem)).toList();
+        retVal.sort((a, b) => b.likes.length.compareTo(a.likes.length)); // Sắp xếp video theo lượt like
         return retVal;
       }),
     );
   }
 
-  searchUser(String typedUser) async {
+  void searchUser(String typedUser) async {
     if (typedUser.isEmpty) {
-      // Nếu không có gì được nhập, gọi lại hàm để lấy tất cả video
-      _getAllVideos();
+      _getAllVideos(); // Gọi lại hàm để lấy tất cả video
       _searchedUsers.value = []; // Reset danh sách người dùng
       return;
     }
 
-    // Chuyển đổi typedUser thành chữ thường để tìm kiếm không phân biệt
     String lowerCaseTypedUser = typedUser.toLowerCase();
 
     // Tìm kiếm người dùng
     _searchedUsers.bindStream(
-      firestore.collection('users')
-          .snapshots()
-          .map((QuerySnapshot query) {
-        List<User> retVal = [];
-        for (var elem in query.docs) {
-          if (elem['name'].toLowerCase().contains(lowerCaseTypedUser)) {
-            retVal.add(User.fromSnap(elem));
-          }
-        }
-        return retVal;
+      firestore.collection('users').snapshots().map((QuerySnapshot query) {
+        return query.docs
+            .where((elem) => elem['name'].toLowerCase().contains(lowerCaseTypedUser))
+            .map((elem) => User.fromSnap(elem))
+            .toList();
       }),
     );
 
     // Tìm kiếm video dựa trên caption và username
     _searchedVideos.bindStream(
-      firestore.collection('videos')
-          .snapshots()
-          .map((QuerySnapshot query) {
-        List<Video> retVal = [];
-        for (var elem in query.docs) {
-          // Kiểm tra cả caption và username
-          if (elem['caption'].toLowerCase().contains(lowerCaseTypedUser) ||
-              elem['username'].toLowerCase().contains(lowerCaseTypedUser)) {
-            retVal.add(Video.fromSnap(elem));
-          }
-        }
-        return retVal;
+      firestore.collection('videos').snapshots().map((QuerySnapshot query) {
+        return query.docs.where((elem) {
+          return elem['caption'].toLowerCase().contains(lowerCaseTypedUser) ||
+              elem['username'].toLowerCase().contains(lowerCaseTypedUser);
+        }).map((elem) => Video.fromSnap(elem)).toList();
       }),
     );
   }

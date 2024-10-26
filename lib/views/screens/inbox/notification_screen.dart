@@ -1,61 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vidstar_app/views/screens/profile_screen.dart';
-import 'package:vidstar_app/views/screens/video_screen2.dart';
-import '../../controllers/auth_controller.dart';
-import '../../models/notification.dart';
-import '../../service/NotificationService.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:vidstar_app/constants.dart';
+import 'package:vidstar_app/views/widgets/custom_icon.dart';
 
-class InboxScreen extends StatelessWidget {
-  const InboxScreen({super.key});
+import '../../../controllers/auth_controller.dart';
+import '../../../models/notification.dart';
+import '../../../service/NotificationService.dart';
+import '../profile_screen.dart';
+import '../video_screen2.dart';
+
+// class NotificationScreen extends StatelessWidget {
+//   final NotificationService notificationService = Get.find<NotificationService>();
+//
+//   NotificationScreen({Key? key}) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final String recipientId = Get.find<AuthController>().user.uid; // Lấy ID người dùng hiện tại
+//
+//     return FutureBuilder<List<Notifications>>(
+//       future: notificationService.getNotifications(recipientId),
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//           return const Center(child: CircularProgressIndicator());
+//         } else if (snapshot.hasError) {
+//           return Center(child: Text('Error: ${snapshot.error}'));
+//         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+//           return const Center(child: Text('No notifications'));
+//         }
+//
+//         final notifications = snapshot.data!;
+//
+//         return ListView.builder(
+//           itemCount: notifications.length,
+//           itemBuilder: (context, index) {
+//             final notificationItem = notifications[index];
+//
+//             return NotificationTile(
+//               notification: notificationItem,
+//               onTap: () async {
+//                 // Đánh dấu thông báo là đã đọc
+//                 await notificationService.markNotificationAsRead(notificationItem.id);
+//                 // Cập nhật danh sách thông báo
+//                 (context as Element).reassemble(); // Cách tạm thời để cập nhật trạng thái
+//               },
+//             );
+//           },
+//         );
+//       },
+//     );
+//   }
+// }
+
+class NotificationScreen extends StatefulWidget {
+  const NotificationScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2, // Số lượng tab
-      child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              // Container chứa TabBar
-              Container(
-                color: Colors.white10,
-                child: const TabBar(
-                  tabs: [
-                    Tab(text: 'Notifications'),
-                    Tab(text: 'Messages'),
-                  ],
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.grey,
-                ),
-              ),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    NotificationScreen(),
-                    const ChatScreen(),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class NotificationScreen extends StatelessWidget {
+class _NotificationScreenState extends State<NotificationScreen> {
   final NotificationService notificationService = Get.find<NotificationService>();
-
-  NotificationScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final String recipientId = Get.find<AuthController>().user.uid; // Lấy ID người dùng hiện tại
+    final String recipientId = Get.find<AuthController>().user.uid;
 
-    return FutureBuilder<List<Notifications>>(
-      future: notificationService.getNotifications(recipientId),
+    return StreamBuilder<List<Notifications>>(
+      stream: notificationService.getNotificationsStream(recipientId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -75,10 +88,7 @@ class NotificationScreen extends StatelessWidget {
             return NotificationTile(
               notification: notificationItem,
               onTap: () async {
-                // Đánh dấu thông báo là đã đọc
                 await notificationService.markNotificationAsRead(notificationItem.id);
-                // Cập nhật danh sách thông báo
-                (context as Element).reassemble(); // Cách tạm thời để cập nhật trạng thái
               },
             );
           },
@@ -151,7 +161,7 @@ class NotificationTile extends StatelessWidget {
           subtitle: Row(
             children: [
               const Icon(Icons.access_time, color: Colors.grey, size: 12), // Biểu tượng thời gian
-              const SizedBox(width: 4), // Khoảng cách giữa biểu tượng và thời gian
+              const SizedBox(width: 4),
               Text(
                 notification.timeAgo,
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
@@ -160,20 +170,6 @@ class NotificationTile extends StatelessWidget {
           ),
           trailing: notification.isRead ? const Icon(Icons.check, color: Colors.green) : null,
         ),
-      ),
-    );
-  }
-}
-
-class ChatScreen extends StatelessWidget {
-  const ChatScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'This is the Chat Screen',
-        style: TextStyle(fontSize: 24, color: Colors.white),
       ),
     );
   }

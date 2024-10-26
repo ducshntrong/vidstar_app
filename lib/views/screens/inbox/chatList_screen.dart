@@ -115,6 +115,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           chat.lastMessage,
                           user.profilePhoto,
                           DateFormat.jm().format(chat.lastTimestamp.toDate()),
+                          chat.lastMessageSenderId, // Truyền vào ID người gửi của tin nhắn cuối
                           isRead: false,
                           isOnline: true,
                         ),
@@ -164,7 +165,20 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-  Widget _buildChatTile(String name, String message, String profilePhoto, String time, {bool isRead = false, bool isOnline = true}) {
+  Widget _buildChatTile(
+      String name,
+      String message,
+      String profilePhoto,
+      String time,
+      String lastMessageSenderId, {
+        bool isRead = false,
+        bool isOnline = true,
+      }) {
+    // Kiểm tra xem tin nhắn là của người gửi hay người nhận
+    String displayMessage = lastMessageSenderId == authController.user.uid
+        ? 'You: $message' // Thêm "You: " nếu là người gửi
+        : message; // Nếu không, chỉ hiển thị tin nhắn
+
     return ListTile(
       leading: Stack(
         children: [
@@ -187,23 +201,24 @@ class _ChatListScreenState extends State<ChatListScreen> {
         name,
         style: TextStyle(fontWeight: isRead ? FontWeight.normal : FontWeight.bold),
       ),
-      subtitle: Text(message),
+      subtitle: Text(
+        _truncateMessage(displayMessage, 20), // Sử dụng biến mới ở đây
+        overflow: TextOverflow.ellipsis,
+      ),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(time, style: TextStyle(color: Colors.grey, fontSize: 12)),
-          if (isRead) ...[
-            SizedBox(height: 4),
-            CircleAvatar(
-              radius: 7,
-              backgroundImage: NetworkImage(profilePhoto),
-            ),
-          ] else ...[
-            SizedBox(height: 4),
-            Icon(Icons.check_circle_outline, size: 15),
-          ],
         ],
       ),
     );
+  }
+
+// Hàm để cắt ngắn tin nhắn
+  String _truncateMessage(String message, int maxLength) {
+    if (message.length > maxLength) {
+      return message.substring(0, maxLength) + '...';
+    }
+    return message;
   }
 }

@@ -7,6 +7,7 @@ class Chat {
   final List<String> users;
   final String senderId;
   final String receiverId;
+  final String lastMessageSenderId;
 
   Chat({
     required this.chatId,
@@ -15,6 +16,7 @@ class Chat {
     required this.users,
     required this.senderId,
     required this.receiverId,
+    required this.lastMessageSenderId,
   });
 
   factory Chat.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class Chat {
       users: List<String>.from(json['users'] as List<dynamic>? ?? []),
       senderId: json['senderId'] as String? ?? '',
       receiverId: json['receiverId'] as String? ?? '',
+      lastMessageSenderId: json['lastMessageSenderId'] as String? ?? '',
     );
   }
 
@@ -36,6 +39,7 @@ class Chat {
       'users': users,
       'senderId': senderId,
       'receiverId': receiverId,
+      'lastMessageSenderId': lastMessageSenderId,
     };
   }
 }

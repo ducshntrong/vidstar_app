@@ -71,6 +71,7 @@ class ChatController extends GetxController {
     }
   }
 
+  //lắng nghe các thay đổi trong chats và cập nhật ds chats
   void listenForChats() {
     firestore.collection('chats')
         .where('users', arrayContains: authController.user.uid)
@@ -92,13 +93,30 @@ class ChatController extends GetxController {
         .collection('chats')
         .doc(chatId)
         .collection('messages')
-        .orderBy('timestamp', descending: true)
+        .orderBy('timestamp', descending: false)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
         return Message.fromJson(doc.data() as Map<String, dynamic>);
-      }).toList().reversed.toList(); // Đảo ngược danh sách ở đây
+      }).toList();
     });
+  }
+
+  //Cập nhật Trạng thái tin nhắn khi ng Nhận Xem
+  Future<void> markMessagesAsSeen(String chatId, String receiverId) async {
+    // Lấy danh sách tin nhắn chưa được xem
+    final messagesSnapshot = await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .where('seen', isEqualTo: false)
+        .where('receiverId', isEqualTo: receiverId)
+        .get();
+
+    // Cập nhật trạng thái tin nhắn thành đã xem
+    for (var doc in messagesSnapshot.docs) {
+      await doc.reference.update({'seen': true});
+    }
   }
 
   // Gửi tin nhắn và cập nhật vào Firestore
@@ -129,9 +147,8 @@ class ChatController extends GetxController {
       'users': FieldValue.arrayUnion([senderId, receiverId]), // Đảm bảo cả hai người dùng đều được lưu
       'senderId': senderId,
       'receiverId': receiverId,
+      'lastMessageSenderId': senderId, // Gán ID người gửi tin nhắn cuối
     }, SetOptions(merge: true)); // Sử dụng merge để giữ lại các trường khác
-
   }
-
 }
 

@@ -9,170 +9,6 @@ import '../../../controllers/chat_controller.dart';
 import '../../../models/message.dart';
 import '../../../models/user.dart';
 
-// class ChatScreen extends StatefulWidget {
-//   final User user; // Thêm biến để nhận người dùng
-//
-//   ChatScreen({required this.user}); // Constructor nhận người dùng
-//
-//   @override
-//   _ChatScreenState createState() => _ChatScreenState();
-// }
-//
-// class _ChatScreenState extends State<ChatScreen> {
-//   final TextEditingController _messageController = TextEditingController(); // Bộ điều khiển cho ô nhập tin nhắn
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Color(0xFF222222), // Màu nền tối
-//       appBar: AppBar(
-//         backgroundColor: Color(0xFF222222),
-//         elevation: 0,
-//         leadingWidth: 250, // Tăng giá trị leadingWidth để tránh tràn
-//         leading: Row(
-//           children: [
-//             Padding(
-//               padding: const EdgeInsets.all(8.0),
-//               child: CircleAvatar(
-//                 backgroundImage: NetworkImage(widget.user.profilePhoto), // Hiển thị ảnh đại diện người dùng
-//               ),
-//             ),
-//             Expanded(
-//               child: Text(
-//                 widget.user.name, // Hiển thị tên người dùng
-//                 style: TextStyle(color: Colors.white, fontSize: 16),
-//                 overflow: TextOverflow.ellipsis,
-//               ),
-//             ),
-//           ],
-//         ),
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.search, color: Colors.white),
-//             onPressed: () {},
-//           ),
-//         ],
-//       ),
-//       body: Column(
-//         children: [
-//           Expanded(
-//             child: ListView(
-//               padding: EdgeInsets.all(16.0),
-//               children: [
-//                 Center(
-//                   child: Text(
-//                     '3 FEB 12:00',
-//                     style: TextStyle(color: Colors.grey, fontSize: 12),
-//                   ),
-//                 ),
-//                 SizedBox(height: 10),
-//                 _buildChatBubble(
-//                   'I commented on Figma, I want to add some fancy icons. Do you have any icon set?',
-//                   true,
-//                   '00:12',
-//                 ),
-//                 _buildChatBubble(
-//                   'I am in a process of designing some. When do you need them?',
-//                   false,
-//                   '00:12',
-//                 ),
-//                 _buildChatBubble(
-//                   'Next month?',
-//                   true,
-//                   '00:13',
-//                 ),
-//                 _buildChatBubble(
-//                   'I am almost finished. Please give me your email, I will ZIP them and send you as soon as I’m finished.',
-//                   false,
-//                   '00:45',
-//                 ),
-//                 _buildChatBubble(
-//                   'Hello',
-//                   true,
-//                   '00:45',
-//                 ),
-//               ],
-//             ),
-//           ),
-//           Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: Row(
-//               children: [
-//                 Expanded(
-//                   child: TextField(
-//                     controller: _messageController, // Gán bộ điều khiển cho ô nhập tin nhắn
-//                     decoration: InputDecoration(
-//                       hintText: 'Message',
-//                       hintStyle: TextStyle(color: Colors.white70),
-//                       filled: true,
-//                       fillColor: Color(0xFF2C3342),
-//                       border: OutlineInputBorder(
-//                         borderRadius: BorderRadius.circular(30),
-//                         borderSide: BorderSide.none,
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//                 SizedBox(width: 10),
-//                 CircleAvatar(
-//                   backgroundColor: Colors.red[400],
-//                   child: IconButton(
-//                     icon: Icon(Icons.send, color: Colors.white),
-//                     onPressed: () {
-//                       // Xử lý gửi tin nhắn
-//                       String message = _messageController.text;
-//                       if (message.isNotEmpty) {
-//                         // Gửi tin nhắn và làm sạch ô nhập
-//                         print("Sent: $message");
-//                         _messageController.clear();
-//                       }
-//                     },
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   Widget _buildChatBubble(String text, bool isSender, String time, {bool isEmail = false}) {
-//     return Align(
-//       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
-//       child: Column(
-//         crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-//         children: [
-//           Container(
-//             padding: EdgeInsets.all(12),
-//             margin: EdgeInsets.symmetric(vertical: 5),
-//             decoration: BoxDecoration(
-//               color: isSender ? Color(0xFF7A8194) : Color(0xFF2C3342),
-//               borderRadius: BorderRadius.only(
-//                 topLeft: Radius.circular(15),
-//                 topRight: Radius.circular(15),
-//                 bottomLeft: isSender ? Radius.circular(15) : Radius.circular(0),
-//                 bottomRight: isSender ? Radius.circular(0) : Radius.circular(15),
-//               ),
-//             ),
-//             child: Text(
-//               text,
-//               style: TextStyle(
-//                 color: isEmail ? Colors.blueAccent : Colors.white,
-//                 decoration: isEmail ? TextDecoration.underline : TextDecoration.none,
-//               ),
-//             ),
-//           ),
-//           SizedBox(height: 5),
-//           Text(
-//             time,
-//             style: TextStyle(color: Colors.grey, fontSize: 10),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
 class ChatScreen extends StatefulWidget {
   final User user; // Người dùng nhận tin
 
@@ -196,6 +32,13 @@ class _ChatScreenState extends State<ChatScreen> {
         : '${authController.user.uid}_${widget.user.uid}';
 
     chatController.fetchMessages(chatId); // Tải tin nhắn của cuộc trò chuyện
+    // Đánh dấu tin nhắn là đã xem
+    markMessagesAsSeen();
+  }
+
+// Hàm đánh dấu tin nhắn là đã xem
+  void markMessagesAsSeen() async {
+    await chatController.markMessagesAsSeen(chatId, authController.user.uid);
   }
 
   @override
@@ -258,9 +101,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemBuilder: (context, index) {
                     final Message message = messages[index];
                     return _buildChatBubble(
-                      message.message,
-                      message.senderId == authController.user.uid,
-                      DateFormat.jm().format(message.timestamp),
+                        message.message,
+                        message.senderId == authController.user.uid,
+                        DateFormat.jm().format(message.timestamp),
+                        message.seen
                     );
                   },
                 );
@@ -316,7 +160,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildChatBubble(String text, bool isSender, String time) {
+  Widget _buildChatBubble(String text, bool isSender, String time, bool isSeen) {
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Column(
@@ -340,13 +184,26 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           SizedBox(height: 5),
-          Text(
-            time,
-            style: TextStyle(color: Colors.grey, fontSize: 10),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                time,
+                style: TextStyle(color: Colors.grey, fontSize: 10),
+              ),
+              SizedBox(width: 5), // Khoảng cách giữa thời gian và dấu tích
+              if (isSender && isSeen) // Chỉ hiển thị dấu tích nếu là người gửi và đã xem
+                const Icon(
+                  Icons.check,
+                  size: 12,
+                  color: Colors.green, // Màu cho dấu tích
+                ),
+            ],
           ),
         ],
       ),
     );
   }
 }
+
 

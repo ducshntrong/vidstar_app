@@ -95,6 +95,51 @@ class AuthController extends GetxController {
     }
   }
 
+  // void registerUser(
+  //     String username, String email, String password, File? image) async {
+  //   try {
+  //     if (username.isNotEmpty &&
+  //         email.isNotEmpty &&
+  //         password.isNotEmpty &&
+  //         image != null) {
+  //       // Đăng ký người dùng
+  //       UserCredential cred = await firebaseAuth.createUserWithEmailAndPassword(
+  //         email: email,
+  //         password: password,
+  //       );
+  //
+  //       // Lấy token FCM
+  //       String? fcmToken = await FirebaseMessaging.instance.getToken();
+  //
+  //       // Tải lên hình ảnh và lấy URL
+  //       String downloadUrl = await _uploadToStorage(image);
+  //       model.User user = model.User(
+  //         name: username,
+  //         email: email,
+  //         uid: cred.user!.uid,
+  //         profilePhoto: downloadUrl,
+  //         fcmToken: fcmToken, // Lưu token FCM vào người dùng
+  //       );
+  //
+  //       // Lưu thông tin người dùng vào Firestore
+  //       await firestore
+  //           .collection('users')
+  //           .doc(cred.user!.uid)
+  //           .set(user.toJson());
+  //     } else {
+  //       Get.snackbar(
+  //         'Error Creating Account',
+  //         'Please enter all the fields',
+  //       );
+  //     }
+  //   } catch (e) {
+  //     Get.snackbar(
+  //       'Error Creating Account',
+  //       e.toString(),
+  //     );
+  //   }
+  // }
+
   var isLoading = false.obs; // Biến trạng thái tải lên
   Future<void> updateUser({
     String? name,

@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/notification.dart';
+import 'package:http/http.dart' as http;
 
 class NotificationService {
   final FirebaseFirestore firestore;
@@ -79,5 +82,28 @@ class NotificationService {
 
       return notifications; // Trả về danh sách đã sắp xếp
     });
+  }
+  // Hàm gửi thông báo FCM
+  Future<void> sendPushNotification(String token, String message, String senderId) async {
+    final url = 'https://fcm.googleapis.com/fcm/send';
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'key=YOUR_SERVER_KEY', // Thay YOUR_SERVER_KEY bằng server key của bạn
+    };
+
+    final body = json.encode({
+      'to': token,
+      'notification': {
+        'title': 'New Message',
+        'body': message,
+        'click_action': 'FLUTTER_NOTIFICATION_CLICK', // Hành động khi nhấp vào thông báo
+      },
+      'data': {
+        'senderId': senderId,
+        // Thêm thông tin bổ sung nếu cần
+      },
+    });
+
+    await http.post(Uri.parse(url), headers: headers, body: body);
   }
 }

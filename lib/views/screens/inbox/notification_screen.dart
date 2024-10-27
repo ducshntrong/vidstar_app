@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -6,9 +7,11 @@ import 'package:vidstar_app/views/widgets/custom_icon.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../models/notification.dart';
+import '../../../models/user.dart';
 import '../../../service/NotificationService.dart';
 import '../profile_screen.dart';
 import '../video_screen2.dart';
+import 'chat_screen.dart';
 
 // class NotificationScreen extends StatelessWidget {
 //   final NotificationService notificationService = Get.find<NotificationService>();
@@ -104,13 +107,23 @@ class NotificationTile extends StatelessWidget {
 
   const NotificationTile({Key? key, required this.notification, required this.onTap}) : super(key: key);
 
-  void _handleTap(BuildContext context) {
+  void _handleTap(BuildContext context) async {
     onTap(); // Gọi hàm onTap khi click vào thông báo
 
-    // Xử lý điều hướng dựa trên loại thông báo
-    if (notification.type == 'like' || notification.type == 'comment'
-        || notification.type == 'likeComment' || notification.type == 'repost'
-        || notification.type == 'reply') {
+    if (notification.type == 'message') {
+      // Lấy thông tin người dùng từ Firestore
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(notification.senderId).get();
+      User user = User.fromSnap(userDoc); // Chuyển đổi sang đối tượng User
+
+      // Điều hướng đến ChatScreen với thông tin người dùng
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(user: user),
+        ),
+      );
+    } else if (notification.type == 'like' || notification.type == 'comment' ||
+        notification.type == 'likeComment' || notification.type == 'repost' ||
+        notification.type == 'reply') {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => VideoScreen2(videoId: notification.videoId),
@@ -160,7 +173,7 @@ class NotificationTile extends StatelessWidget {
           ),
           subtitle: Row(
             children: [
-              const Icon(Icons.access_time, color: Colors.grey, size: 12), // Biểu tượng thời gian
+              const Icon(Icons.access_time, color: Colors.grey, size: 12),
               const SizedBox(width: 4),
               Text(
                 notification.timeAgo,

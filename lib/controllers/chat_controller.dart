@@ -3,7 +3,10 @@ import 'package:get/get.dart';
 import '../constants.dart';
 import '../models/chat.dart';
 import '../models/message.dart';
+import '../models/notification.dart';
 import '../models/user.dart';
+import '../service/NotificationService.dart';
+import 'package:http/http.dart' as http;
 
 class ChatController extends GetxController {
   // Danh sách tin nhắn trong đoạn chat hiện tại
@@ -117,8 +120,18 @@ class ChatController extends GetxController {
     for (var doc in messagesSnapshot.docs) {
       await doc.reference.update({'seen': true});
     }
+    // Cập nhật trường isRead cho chat
+    final chatDoc = FirebaseFirestore.instance.collection('chats').doc(chatId);
+    // Kiểm tra xem có tin nhắn nào chưa được xem không
+    final unreadMessagesCount = messagesSnapshot.docs.length;
+    // Cập nhật isRead nếu không còn tin nhắn chưa xem
+    if (unreadMessagesCount > 0) {
+      await chatDoc.update({'isRead': true});
+    }
   }
 
+  final NotificationService notificationService;
+  ChatController(this.notificationService);
   // Gửi tin nhắn và cập nhật vào Firestore
   Future<void> sendMessage(String chatId, String message, String senderId, String receiverId) async {
     // Gửi tin nhắn
@@ -144,11 +157,43 @@ class ChatController extends GetxController {
     await FirebaseFirestore.instance.collection('chats').doc(chatId).set({
       'lastMessage': message,
       'lastTimestamp': FieldValue.serverTimestamp(),
-      'users': FieldValue.arrayUnion([senderId, receiverId]), // Đảm bảo cả hai người dùng đều được lưu
+      'users': FieldValue.arrayUnion([senderId, receiverId]),
       'senderId': senderId,
       'receiverId': receiverId,
       'lastMessageSenderId': senderId, // Gán ID người gửi tin nhắn cuối
+      'isRead': false,
     }, SetOptions(merge: true)); // Sử dụng merge để giữ lại các trường khác
+
+    // Gửi thông báo cho người nhận tin nhắn
+    if (senderId != receiverId) {
+      DocumentSnapshot userDoc = await firestore.collection('users').doc(senderId).get();
+      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+
+      await notificationService.createNotification(
+        Notifications(
+          id: 'Notification_${DateTime.now().millisecondsSinceEpoch}',
+          profileImage: userData['profilePhoto'],
+          username: userData['name'],
+          content: " sent you a message.",
+          date: DateTime.now(),
+          recipientId: receiverId,
+          videoId: '',
+          isRead: false,
+          type: "message",
+          senderId: senderId,
+        ),
+      );
+    }
+
+    // // Gửi thông báo cho người nhận tin nhắn
+    // if (senderId != receiverId) {
+    //   DocumentSnapshot userDoc = await firestore.collection('users').doc(receiverId).get();
+    //   String? fcmToken = userDoc['fcmToken']; // Lấy token FCM của người nhận
+    //
+    //   if (fcmToken != null) {
+    //     await notificationService.sendPushNotification(fcmToken, message, senderId);
+    //   }
+    // }
   }
 }
 

@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Message {
-  String messageId;
-  String message;
-  String senderId;
-  String receiverId;
-  DateTime timestamp;
-  bool seen;
-  String chatId;
+  final String messageId;
+  final String message;
+  final String senderId;
+  final String receiverId;
+  final DateTime timestamp;
+  final bool seen;
+  final String chatId;
 
   Message({
     required this.messageId,
@@ -35,9 +35,7 @@ class Message {
       message: json['message'] ?? '',
       senderId: json['senderId'] ?? '',
       receiverId: json['receiverId'] ?? '',
-      timestamp: json['timestamp'] != null
-          ? DateTime.tryParse(json['timestamp']) ?? DateTime.now()
-          : DateTime.now(),
+      timestamp: DateTime.tryParse(json['timestamp']) ?? DateTime.now(),
       seen: json['seen'] ?? false,
       chatId: json['chatId'] ?? '',
     );

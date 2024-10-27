@@ -21,6 +21,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final ChatController chatController = Get.find<ChatController>();
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController(); // Thêm ScrollController
 
   late String chatId; // ID của cuộc trò chuyện
 
@@ -32,11 +33,9 @@ class _ChatScreenState extends State<ChatScreen> {
         : '${authController.user.uid}_${widget.user.uid}';
 
     chatController.fetchMessages(chatId); // Tải tin nhắn của cuộc trò chuyện
-    // Đánh dấu tin nhắn là đã xem
     markMessagesAsSeen();
   }
 
-// Hàm đánh dấu tin nhắn là đã xem
   void markMessagesAsSeen() async {
     await chatController.markMessagesAsSeen(chatId, authController.user.uid);
   }
@@ -54,7 +53,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Navigator.of(context).pop(); // Quay lại màn hình trước
           },
         ),
-        leadingWidth: 20, // Chiều rộng của leading
+        leadingWidth: 20,
         title: Row(
           children: [
             Padding(
@@ -95,7 +94,16 @@ class _ChatScreenState extends State<ChatScreen> {
                   return Center(child: Text('No messages yet', style: TextStyle(color: Colors.white70)));
                 }
                 final messages = snapshot.data!;
+
+                // Cuộn xuống dưới sau khi nhận dữ liệu
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_scrollController.hasClients) {
+                    _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                  }
+                });
+
                 return ListView.builder(
+                  controller: _scrollController, // Gán ScrollController vào ListView
                   padding: EdgeInsets.all(16.0),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
@@ -128,9 +136,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    keyboardType: TextInputType.multiline, // Cho phép nhập nhiều dòng
-                    maxLines: null, // Cho phép không giới hạn dòng
-                    minLines: 1, // Số dòng tối thiểu
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    minLines: 1,
                   ),
                 ),
                 SizedBox(width: 10),
@@ -144,10 +152,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         chatController.sendMessage(
                           chatId,
                           message,
-                          authController.user.uid, // ID người gửi
-                          widget.user.uid, // ID người nhận
+                          authController.user.uid,
+                          widget.user.uid,
                         );
-                        _messageController.clear(); // Xóa nội dung ô nhập
+                        _messageController.clear();
                       }
                     },
                   ),
@@ -191,12 +199,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 time,
                 style: TextStyle(color: Colors.grey, fontSize: 10),
               ),
-              SizedBox(width: 5), // Khoảng cách giữa thời gian và dấu tích
-              if (isSender && isSeen) // Chỉ hiển thị dấu tích nếu là người gửi và đã xem
+              SizedBox(width: 5),
+              if (isSender && isSeen)
                 const Icon(
                   Icons.check,
                   size: 12,
-                  color: Colors.green, // Màu cho dấu tích
+                  color: Colors.green,
                 ),
             ],
           ),

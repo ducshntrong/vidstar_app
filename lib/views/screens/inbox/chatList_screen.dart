@@ -6,6 +6,7 @@ import 'package:vidstar_app/models/user.dart';
 import '../../../constants.dart';
 import '../../../models/chat.dart';
 import '../../../models/message.dart';
+import '../../../service/NotificationService.dart';
 import 'chat_screen.dart';
 
 class ChatListScreen extends StatefulWidget {
@@ -14,12 +15,15 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
-  final ChatController chatController = Get.put(ChatController());
+  final NotificationService notificationService = Get.find<NotificationService>();
+  late final ChatController chatController;
+
   final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    chatController = ChatController(notificationService);
     chatController.fetchUsers();
     chatController.fetchUserChats();
     chatController.listenForChats();
@@ -116,7 +120,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           user.profilePhoto,
                           DateFormat.jm().format(chat.lastTimestamp.toDate()),
                           chat.lastMessageSenderId, // Truyền vào ID người gửi của tin nhắn cuối
-                          isRead: false,
+                          chat.isRead,
                           isOnline: true,
                         ),
                       );
@@ -170,14 +174,24 @@ class _ChatListScreenState extends State<ChatListScreen> {
       String message,
       String profilePhoto,
       String time,
-      String lastMessageSenderId, {
-        bool isRead = false,
+      String lastMessageSenderId,
+      bool isRead, {
         bool isOnline = true,
       }) {
     // Kiểm tra xem tin nhắn là của người gửi hay người nhận
     String displayMessage = lastMessageSenderId == authController.user.uid
-        ? 'You: $message' // Thêm "You: " nếu là người gửi
-        : message; // Nếu không, chỉ hiển thị tin nhắn
+        ? 'You: $message'
+        : message;
+
+    // Xác định màu sắc cho subtitle dựa trên trạng thái isRead và người gửi
+    Color subtitleColor = (lastMessageSenderId != authController.user.uid && !isRead)
+        ? Colors.white
+        : Colors.grey;
+
+    // Xác định kiểu chữ cho subtitle
+    FontWeight subtitleFontWeight = lastMessageSenderId == authController.user.uid
+        ? FontWeight.normal
+        : (isRead ? FontWeight.normal : FontWeight.bold);
 
     return ListTile(
       leading: Stack(
@@ -199,16 +213,40 @@ class _ChatListScreenState extends State<ChatListScreen> {
       ),
       title: Text(
         name,
-        style: TextStyle(fontWeight: isRead ? FontWeight.normal : FontWeight.bold),
+        style: TextStyle(
+          fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+          fontSize: 15,
+          color: Colors.white,
+        ),
       ),
       subtitle: Text(
-        _truncateMessage(displayMessage, 20), // Sử dụng biến mới ở đây
+        _truncateMessage(displayMessage, 20),
         overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontWeight: subtitleFontWeight,
+          fontSize: 14,
+          color: subtitleColor,
+        ),
       ),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(time, style: TextStyle(color: Colors.grey, fontSize: 12)),
+          // Chỉ hiển thị biểu tượng hoặc ảnh đại diện nếu tin nhắn là của mình
+          if (lastMessageSenderId != authController.user.uid) ...[
+            SizedBox.shrink(), // Không hiển thị gì nếu là tin nhắn của mình
+          ] else ...[
+            if (isRead) ...[
+              SizedBox(height: 4),
+              CircleAvatar(
+                radius: 7,
+                backgroundImage: NetworkImage(profilePhoto),
+              ),
+            ] else ...[
+              SizedBox(height: 4),
+              Icon(Icons.check_circle_outline, size: 15),
+            ],
+          ],
         ],
       ),
     );
@@ -217,7 +255,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 // Hàm để cắt ngắn tin nhắn
   String _truncateMessage(String message, int maxLength) {
     if (message.length > maxLength) {
-      return message.substring(0, maxLength) + '...';
+      return '${message.substring(0, maxLength)}...';
     }
     return message;
   }

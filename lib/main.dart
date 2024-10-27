@@ -17,10 +17,13 @@ void main() async {
 
   // Đăng ký AuthController
   Get.put(AuthController());
-  Get.put(ChatController());
 
   // Đăng ký NotificationService
-  Get.put(NotificationService(FirebaseFirestore.instance));
+  final notificationService = NotificationService(FirebaseFirestore.instance);
+  Get.put(notificationService);
+
+  // Đăng ký ChatController với NotificationService
+  Get.put(ChatController(notificationService));
 
   runApp(const MyApp());
 }

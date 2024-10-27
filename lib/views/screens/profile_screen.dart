@@ -264,8 +264,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       Get.to(() => UpdateScreen());
                                     } else {
                                       // Nếu không phải, thực hiện chức năng gửi tin nhắn
-                                      // Thay đổi dòng dưới đây để mở màn hình gửi tin nhắn
-                                      Get.to(() => ChatScreen(user: user)); // Giả sử ChatScreen là màn hình gửi tin nhắn
+                                      Get.to(() => ChatScreen(user: user));
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(

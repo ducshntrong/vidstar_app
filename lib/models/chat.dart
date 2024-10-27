@@ -8,6 +8,7 @@ class Chat {
   final String senderId;
   final String receiverId;
   final String lastMessageSenderId;
+  final bool isRead;
 
   Chat({
     required this.chatId,
@@ -17,17 +18,19 @@ class Chat {
     required this.senderId,
     required this.receiverId,
     required this.lastMessageSenderId,
+    this.isRead = false,
   });
 
   factory Chat.fromJson(Map<String, dynamic> json) {
     return Chat(
-      chatId: json['chatId'] as String? ?? '', // Cung cấp giá trị mặc định
-      lastMessage: json['lastMessage'] as String? ?? '',
-      lastTimestamp: json['lastTimestamp'] as Timestamp? ?? Timestamp.now(), // Hoặc giá trị mặc định khác
-      users: List<String>.from(json['users'] as List<dynamic>? ?? []),
-      senderId: json['senderId'] as String? ?? '',
-      receiverId: json['receiverId'] as String? ?? '',
-      lastMessageSenderId: json['lastMessageSenderId'] as String? ?? '',
+      chatId: json['chatId'] ?? '',
+      lastMessage: json['lastMessage'] ?? '',
+      lastTimestamp: json['lastTimestamp'] ?? Timestamp.now(),
+      users: List<String>.from(json['users'] ?? []),
+      senderId: json['senderId'] ?? '',
+      receiverId: json['receiverId'] ?? '',
+      lastMessageSenderId: json['lastMessageSenderId'] ?? '',
+      isRead: json['isRead'] ?? false,
     );
   }
 
@@ -40,6 +43,7 @@ class Chat {
       'senderId': senderId,
       'receiverId': receiverId,
       'lastMessageSenderId': lastMessageSenderId,
+      'isRead': isRead,
     };
   }
 }

@@ -12,6 +12,11 @@ class SearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Đặt lại trạng thái tìm kiếm khi màn hình được hiển thị
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      searchController.resetSearch(); // Gọi hàm reset
+    });
+
     return Obx(() {
       return Scaffold(
         backgroundColor: Colors.white10,
@@ -23,7 +28,7 @@ class SearchScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(25),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(25), // Bo góc cho TextFormField
+              borderRadius: BorderRadius.circular(25),
               child: TextFormField(
                 decoration: InputDecoration(
                   filled: true,
@@ -37,7 +42,7 @@ class SearchScreen extends StatelessWidget {
                     Icons.search,
                     color: Colors.white.withOpacity(0.6),
                   ),
-                  border: InputBorder.none, // Không có đường viền
+                  border: InputBorder.none,
                 ),
                 style: const TextStyle(
                   color: Colors.white,
@@ -50,17 +55,14 @@ class SearchScreen extends StatelessWidget {
           actions: [
             IconButton(
               icon: const Icon(Icons.mic, color: Colors.white),
-              onPressed: () {
-              },
+              onPressed: () {},
             ),
             IconButton(
               icon: const Icon(Icons.more_vert, color: Colors.white),
-              onPressed: () {
-              },
+              onPressed: () {},
             ),
           ],
         ),
-
         body: Column(
           children: [
             if (searchController.searchedUsers.isNotEmpty) ...[
@@ -84,15 +86,14 @@ class SearchScreen extends StatelessWidget {
               Expanded(
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // Hiển thị 2 cột
-                    childAspectRatio: 0.58, // Tỉ lệ chiều rộng / chiều cao của các ô
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.58,
                   ),
                   itemCount: searchController.searchedVideos.length,
                   itemBuilder: (context, index) {
                     final video = searchController.searchedVideos[index];
                     return GestureDetector(
                       onTap: () {
-                        // Chuyển đến VideoScreen2 với videoId tương ứng
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => VideoScreen2(videoId: video.id),
@@ -101,7 +102,6 @@ class SearchScreen extends StatelessWidget {
                       },
                       child: Column(
                         children: [
-                          // Hình ảnh thumbnail
                           Padding(
                             padding: const EdgeInsets.all(5.0),
                             child: ClipRRect(
@@ -110,17 +110,15 @@ class SearchScreen extends StatelessWidget {
                                 video.thumbnail,
                                 fit: BoxFit.cover,
                                 width: double.infinity,
-                                height: 250, // Chiều cao cho thumbnail
+                                height: 250,
                               ),
                             ),
                           ),
-                          // Thông tin video
                           Container(
                             padding: const EdgeInsets.all(10),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Caption
                                 Text(
                                   video.caption,
                                   style: const TextStyle(
@@ -130,7 +128,6 @@ class SearchScreen extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                // Hình ảnh profile và thông tin người dùng
                                 Row(
                                   children: [
                                     CircleAvatar(
@@ -142,7 +139,6 @@ class SearchScreen extends StatelessWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          // Username
                                           Text(
                                             video.username,
                                             style: const TextStyle(
@@ -154,7 +150,6 @@ class SearchScreen extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(width: 10),
-                                    // Icon và số lượt thích
                                     Row(
                                       children: [
                                         Icon(Icons.favorite_border, color: Colors.white70, size: 20),

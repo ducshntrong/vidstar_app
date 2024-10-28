@@ -61,11 +61,12 @@ class AuthController extends GetxController {
   void registerUser(
       String username, String email, String password, File? image) async {
     try {
+      isLoading.value = true; // Bắt đầu quá trình đăng ký
       if (username.isNotEmpty &&
           email.isNotEmpty &&
           password.isNotEmpty &&
           image != null) {
-        // save out user to our ath and firebase firestore
+        // Save user to Firebase Auth và Firestore
         UserCredential cred = await firebaseAuth.createUserWithEmailAndPassword(
           email: email,
           password: password,
@@ -92,6 +93,8 @@ class AuthController extends GetxController {
         'Error Creating Account',
         e.toString(),
       );
+    } finally {
+      isLoading.value = false; // Kết thúc quá trình đăng ký
     }
   }
 

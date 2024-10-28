@@ -21,9 +21,10 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final ChatController chatController = Get.find<ChatController>();
   final TextEditingController _messageController = TextEditingController();
-  final ScrollController _scrollController = ScrollController(); // Thêm ScrollController
+  final ScrollController _scrollController = ScrollController();
 
-  late String chatId; // ID của cuộc trò chuyện
+  late String chatId;
+  bool _isSendButtonEnabled = false; // Biến trạng thái để kiểm tra nút gửi
 
   @override
   void initState() {
@@ -32,12 +33,27 @@ class _ChatScreenState extends State<ChatScreen> {
         ? '${widget.user.uid}_${authController.user.uid}'
         : '${authController.user.uid}_${widget.user.uid}';
 
-    chatController.fetchMessages(chatId); // Tải tin nhắn của cuộc trò chuyện
+    chatController.fetchMessages(chatId);
     markMessagesAsSeen();
+
+    // Lắng nghe sự thay đổi trong ô nhập tin nhắn
+    _messageController.addListener(() {
+      setState(() {
+        _isSendButtonEnabled = _messageController.text.isNotEmpty;
+      });
+    });
   }
 
   void markMessagesAsSeen() async {
     await chatController.markMessagesAsSeen(chatId, authController.user.uid);
+  }
+
+  @override
+  void dispose() {
+    // Hủy lắng nghe khi không còn dùng
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -50,7 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.of(context).pop(); // Quay lại màn hình trước
+            Navigator.of(context).pop();
           },
         ),
         leadingWidth: 20,
@@ -63,10 +79,44 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
             Expanded(
-              child: Text(
-                widget.user.name,
-                style: TextStyle(color: Colors.white, fontSize: 16),
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.user.name,
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  // Sử dụng StreamBuilder để cập nhật trạng thái Online/Offline
+                  StreamBuilder<User>(
+                    stream: chatController.getUserStream(widget.user.uid),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final user = snapshot.data!;
+                        return Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: user.isOnline ? Colors.green : Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              user.isOnline
+                                  ? 'Online'
+                                  : 'Offline for ${_getOfflineDuration(user.lastSeen)}',
+                              style: TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                          ],
+                        );
+                      }
+                      return Text('Status unavailable', style: TextStyle(color: Colors.white, fontSize: 12));
+                    },
+                  ),
+                ],
               ),
             ),
           ],
@@ -84,9 +134,6 @@ class _ChatScreenState extends State<ChatScreen> {
             child: StreamBuilder<List<Message>>(
               stream: chatController.fetchMessages(chatId),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
@@ -95,7 +142,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
                 final messages = snapshot.data!;
 
-                // Cuộn xuống dưới sau khi nhận dữ liệu
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (_scrollController.hasClients) {
                     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
@@ -103,16 +149,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 });
 
                 return ListView.builder(
-                  controller: _scrollController, // Gán ScrollController vào ListView
+                  controller: _scrollController,
                   padding: EdgeInsets.all(16.0),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final Message message = messages[index];
                     return _buildChatBubble(
-                        message.message,
-                        message.senderId == authController.user.uid,
-                        DateFormat.jm().format(message.timestamp),
-                        message.seen
+                      message.message,
+                      message.senderId == authController.user.uid,
+                      DateFormat.jm().format(message.timestamp),
+                      message.seen,
                     );
                   },
                 );
@@ -143,10 +189,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 SizedBox(width: 10),
                 CircleAvatar(
-                  backgroundColor: Colors.red[400],
+                  backgroundColor: _isSendButtonEnabled ? Colors.red[400] : Colors.grey, // Thay đổi màu nền
                   child: IconButton(
                     icon: Icon(Icons.send, color: Colors.white),
-                    onPressed: () {
+                    onPressed: _isSendButtonEnabled
+                        ? () {
                       String message = _messageController.text;
                       if (message.isNotEmpty) {
                         chatController.sendMessage(
@@ -157,7 +204,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         );
                         _messageController.clear();
                       }
-                    },
+                    }
+                        : null, // Vô hiệu hóa nút khi không có nội dung
                   ),
                 ),
               ],
@@ -212,6 +260,25 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
+  // Hàm tính toán thời gian offline
+  String _getOfflineDuration(DateTime? lastSeen) {
+    if (lastSeen == null) {
+      return 'unknown';
+    }
+
+    final duration = DateTime.now().difference(lastSeen);
+    if (duration.inSeconds < 60) {
+      return '${duration.inSeconds} seconds ago';
+    } else if (duration.inMinutes < 60) {
+      return '${duration.inMinutes} minutes ago';
+    } else if (duration.inHours < 24) {
+      return '${duration.inHours} hours ago';
+    } else {
+      return '${(duration.inDays)} days ago';
+    }
+  }
 }
+
 
 

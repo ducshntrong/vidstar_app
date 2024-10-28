@@ -28,13 +28,26 @@ class ChatController extends GetxController {
 
     _users.bindStream(
       firestore.collection('users').snapshots().map((QuerySnapshot query) {
-        return query.docs
+        // Lọc và chuyển đổi danh sách người dùng
+        List<User> users = query.docs
             .where((elem) =>
         elem['name'] != null &&
             elem['name'].toLowerCase().contains(lowerCaseTypedUser) &&
             elem['uid'] != authController.user.uid) // Loại bỏ người dùng hiện tại
             .map((elem) => User.fromSnap(elem))
             .toList();
+
+        // Sắp xếp danh sách người dùng theo tình trạng isOnline
+        users.sort((a, b) {
+          // Nếu a là online và b là offline, a xếp trước b
+          if (a.isOnline && !b.isOnline) return -1;
+          // Nếu b là online và a là offline, b xếp trước a
+          if (!a.isOnline && b.isOnline) return 1;
+          // Nếu cả hai có cùng trạng thái, giữ thứ tự hiện tại
+          return 0;
+        });
+
+        return users; // Trả về danh sách đã sắp xếp
       }),
     );
   }
@@ -43,12 +56,35 @@ class ChatController extends GetxController {
   void fetchUsers() {
     _users.bindStream(
       firestore.collection('users').snapshots().map((snapshot) {
-        return snapshot.docs
-            .where((doc) => doc['uid'] != authController.user.uid)
-            .map((doc) => User.fromSnap(doc))
+        // Chuyển đổi snapshot thành danh sách người dùng
+        List<User> users = snapshot.docs
+            .where((doc) => doc['uid'] != authController.user.uid) // Lọc người dùng
+            .map((doc) => User.fromSnap(doc)) // Chuyển đổi từng doc thành User
             .toList();
+
+        // Sắp xếp danh sách người dùng theo tình trạng isOnline
+        users.sort((a, b) {
+          // Nếu a là online và b là offline, a xếp trước b
+          if (a.isOnline && !b.isOnline) return -1;
+          // Nếu b là online và a là offline, b xếp trước a
+          if (!a.isOnline && b.isOnline) return 1;
+          // Nếu cả hai có cùng trạng thái, giữ thứ tự hiện tại
+          return 0;
+        });
+
+        return users; // Trả về danh sách đã sắp xếp
       }),
     );
+  }
+
+  //lấy data user từ firestore dưới dạng 1 stream
+  Stream<User> getUserStream(String uid) {
+    //dùng Firebase Firestore để lấy stream
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .map((snapshot) => User.fromSnap(snapshot));
   }
 
   var chats = <Chat>[].obs;
@@ -160,7 +196,7 @@ class ChatController extends GetxController {
       'users': FieldValue.arrayUnion([senderId, receiverId]),
       'senderId': senderId,
       'receiverId': receiverId,
-      'lastMessageSenderId': senderId, // Gán ID người gửi tin nhắn cuối
+      'lastMessageSenderId': senderId,
       'isRead': false,
     }, SetOptions(merge: true)); // Sử dụng merge để giữ lại các trường khác
 
@@ -169,20 +205,45 @@ class ChatController extends GetxController {
       DocumentSnapshot userDoc = await firestore.collection('users').doc(senderId).get();
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
 
-      await notificationService.createNotification(
-        Notifications(
-          id: 'Notification_${DateTime.now().millisecondsSinceEpoch}',
-          profileImage: userData['profilePhoto'],
-          username: userData['name'],
-          content: " sent you a message.",
-          date: DateTime.now(),
-          recipientId: receiverId,
-          videoId: '',
-          isRead: false,
-          type: "message",
-          senderId: senderId,
-        ),
-      );
+      // Tạo ID cho thông báo
+      String notificationId = 'Notification_$receiverId'; // Sử dụng ID của người nhận để xác định thông báo
+
+      // Kiểm tra xem thông báo đã tồn tại chưa
+      DocumentSnapshot notificationDoc = await firestore.collection('notifications').doc(notificationId).get();
+
+      if (notificationDoc.exists) {
+        // Nếu thông báo đã tồn tại, cập nhật
+        await notificationService.updateNotification(
+          Notifications(
+            id: notificationId,
+            profileImage: userData['profilePhoto'],
+            username: userData['name'],
+            content: " sent you a message.", // Nội dung tin nhắn
+            date: DateTime.now(),
+            recipientId: receiverId,
+            videoId: '',
+            isRead: false,
+            type: "message",
+            senderId: senderId,
+          ),
+        );
+      } else {
+        // Nếu không tồn tại, tạo mới
+        await notificationService.createNotification(
+          Notifications(
+            id: notificationId,
+            profileImage: userData['profilePhoto'],
+            username: userData['name'],
+            content: " sent you a message.", // Nội dung tin nhắn
+            date: DateTime.now(),
+            recipientId: receiverId,
+            videoId: '',
+            isRead: false,
+            type: "message",
+            senderId: senderId,
+          ),
+        );
+      }
     }
 
     // // Gửi thông báo cho người nhận tin nhắn

@@ -85,7 +85,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         ),
                       );
                     },
-                    child: _buildStoryAvatar(user.name, user.profilePhoto, isOnline: true),
+                    child: _buildStoryAvatar(user.name, user.profilePhoto, user.isOnline),
                   );
                 },
               );
@@ -100,31 +100,41 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 itemCount: chatController.chats.length,
                 itemBuilder: (context, index) {
                   final Chat chat = chatController.chats[index];
+                  //sd firstWhere để tìm kiếm trong ds chatController.users
                   final userId = chat.users.firstWhere((id) => id != authController.user.uid, orElse: () => '');
 
                   if (userId.isNotEmpty) {
-                    final user = chatController.users.firstWhere((user) =>
-                    user.uid == userId, orElse: () => User(uid: '', name: 'Unknown', profilePhoto: '', email: ''));
-                    if (user.uid.isNotEmpty) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => ChatScreen(user: user),
-                            ),
-                          );
-                        },
-                        child: _buildChatTile(
-                          user.name,
-                          chat.lastMessage,
-                          user.profilePhoto,
-                          DateFormat.jm().format(chat.lastTimestamp.toDate()),
-                          chat.lastMessageSenderId, // Truyền vào ID người gửi của tin nhắn cuối
-                          chat.isRead,
-                          isOnline: true,
-                        ),
-                      );
-                    }
+                    return StreamBuilder<User?>(
+                      stream: chatController.getUserStream(userId), // Lấy stream của user
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        }
+                        if (!snapshot.hasData) {
+                          return SizedBox.shrink();
+                        }
+
+                        final user = snapshot.data!;
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ChatScreen(user: user),
+                              ),
+                            );
+                          },
+                          child: _buildChatTile(
+                            user.name,
+                            chat.lastMessage,
+                            user.profilePhoto,
+                            DateFormat.jm().format(chat.lastTimestamp.toDate()),
+                            chat.lastMessageSenderId,
+                            chat.isRead,
+                            user.isOnline,
+                          ),
+                        );
+                      },
+                    );
                   }
                   return SizedBox.shrink();
                 },
@@ -136,7 +146,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-  Widget _buildStoryAvatar(String name, String profilePhoto, {bool isOnline = false}) {
+  Widget _buildStoryAvatar(String name, String profilePhoto, bool isOnline) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
@@ -175,9 +185,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       String profilePhoto,
       String time,
       String lastMessageSenderId,
-      bool isRead, {
-        bool isOnline = true,
-      }) {
+      bool isRead,
+      bool isOnline) {
     // Kiểm tra xem tin nhắn là của người gửi hay người nhận
     String displayMessage = lastMessageSenderId == authController.user.uid
         ? 'You: $message'
@@ -232,14 +241,25 @@ class _ChatListScreenState extends State<ChatListScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(time, style: TextStyle(color: Colors.grey, fontSize: 12)),
+          // Hiển thị dấu chấm đỏ nếu tin nhắn chưa đọc
+          if (lastMessageSenderId != authController.user.uid && !isRead)
+            Container(
+              margin: const EdgeInsets.only(top: 4), // Khoảng cách giữa thời gian và dấu chấm
+              width: 11,
+              height: 11,
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+            ),
           // Chỉ hiển thị biểu tượng hoặc ảnh đại diện nếu tin nhắn là của mình
           if (lastMessageSenderId != authController.user.uid) ...[
-            SizedBox.shrink(), // Không hiển thị gì nếu là tin nhắn của mình
+            SizedBox.shrink(),
           ] else ...[
             if (isRead) ...[
               SizedBox(height: 4),
               CircleAvatar(
-                radius: 7,
+                radius: 8,
                 backgroundImage: NetworkImage(profilePhoto),
               ),
             ] else ...[

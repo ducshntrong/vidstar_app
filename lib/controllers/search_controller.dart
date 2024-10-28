@@ -57,4 +57,11 @@ class SearchControler extends GetxController {
       }),
     );
   }
+
+  void resetSearch() {
+    // Xóa danh sách người dùng và video đã tìm kiếm
+    _searchedUsers.value = [];
+    _searchedVideos.value = [];
+    _getAllVideos();
+  }
 }

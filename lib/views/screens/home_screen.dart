@@ -6,6 +6,7 @@ import 'package:vidstar_app/views/widgets/custom_icon.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../service/NotificationService.dart';
+import '../../service/UserStatusService.dart';
 
 // class HomeScreen extends StatefulWidget {
 //   const HomeScreen({Key? key}) : super(key: key);
@@ -77,14 +78,34 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
   int pageIdx = 0;
   int newNotificationCount = 0; // Biến để lưu số lượng thông báo mới
+  late UserStatusService userStatusService;
 
   @override
   void initState() {
     super.initState();
+    userStatusService = UserStatusService(firestore, Get.find<AuthController>().user.uid);
+    WidgetsBinding.instance.addObserver(this);
+    userStatusService.setOnline();
     _listenForNotifications();
+  }
+
+  @override
+  void dispose() {
+    userStatusService.setOffline(); // Đặt trạng thái là offline khi thoát
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      userStatusService.setOffline(); // Cập nhật trạng thái offline khi app bị tạm dừng
+    } else if (state == AppLifecycleState.resumed) {
+      userStatusService.setOnline(); // Cập nhật trạng thái online khi app được mở lại
+    }
   }
 
   void _listenForNotifications() {

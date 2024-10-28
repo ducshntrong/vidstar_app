@@ -8,6 +8,8 @@ class User {
   String? phoneNumber;
   DateTime? birthDate;
   String? gender;
+  bool isOnline;
+  DateTime? lastSeen;
 
   User({
     required this.name,
@@ -17,6 +19,8 @@ class User {
     this.phoneNumber,
     this.birthDate,
     this.gender,
+    this.isOnline = false, // Mặc định là offline
+    this.lastSeen,
   });
 
   Map<String, dynamic> toJson() => {
@@ -27,6 +31,8 @@ class User {
     "phoneNumber": phoneNumber,
     "birthDate": birthDate?.toIso8601String(),
     "gender": gender,
+    "isOnline": isOnline,
+    "lastSeen": lastSeen?.toIso8601String(),
   };
 
   static User fromSnap(DocumentSnapshot snap) {
@@ -39,8 +45,11 @@ class User {
       phoneNumber: snapshot['phoneNumber'],
       birthDate: snapshot['birthDate'] != null ? DateTime.parse(snapshot['birthDate']) : null,
       gender: snapshot['gender'],
+      isOnline: snapshot['isOnline'] ?? false,
+      lastSeen: snapshot['lastSeen'] != null ? (snapshot['lastSeen'] as Timestamp).toDate() : null, // Chuyển đổi Timestamp sang DateTime
     );
   }
+
 }
 
 // class User {

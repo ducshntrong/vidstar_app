@@ -83,6 +83,17 @@ class NotificationService {
       return notifications; // Trả về danh sách đã sắp xếp
     });
   }
+
+  // Cập nhật thông báo
+  Future<void> updateNotification(Notifications notification) async {
+    try {
+      // Cập nhật thông báo dựa trên ID
+      await firestore.collection('notifications').doc(notification.id).update(notification.toJson());
+    } catch (e) {
+      print("Error updating notification: $e");
+    }
+  }
+
   // Hàm gửi thông báo FCM
   Future<void> sendPushNotification(String token, String message, String senderId) async {
     final url = 'https://fcm.googleapis.com/fcm/send';

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vidstar_app/constants.dart';
@@ -24,6 +25,10 @@ void main() async {
 
   // Đăng ký ChatController với NotificationService
   Get.put(ChatController(notificationService));
+  // final _messaging = FirebaseMessaging.instance;
+  // await _messaging.requestPermission();
+  // final token = await _messaging.getToken();
+  // print('TokenFCM: $token');
 
   runApp(const MyApp());
 }

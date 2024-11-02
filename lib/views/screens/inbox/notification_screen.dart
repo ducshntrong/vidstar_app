@@ -13,49 +13,6 @@ import '../profile_screen.dart';
 import '../video_screen2.dart';
 import 'chat_screen.dart';
 
-// class NotificationScreen extends StatelessWidget {
-//   final NotificationService notificationService = Get.find<NotificationService>();
-//
-//   NotificationScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final String recipientId = Get.find<AuthController>().user.uid; // Lấy ID người dùng hiện tại
-//
-//     return FutureBuilder<List<Notifications>>(
-//       future: notificationService.getNotifications(recipientId),
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.waiting) {
-//           return const Center(child: CircularProgressIndicator());
-//         } else if (snapshot.hasError) {
-//           return Center(child: Text('Error: ${snapshot.error}'));
-//         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-//           return const Center(child: Text('No notifications'));
-//         }
-//
-//         final notifications = snapshot.data!;
-//
-//         return ListView.builder(
-//           itemCount: notifications.length,
-//           itemBuilder: (context, index) {
-//             final notificationItem = notifications[index];
-//
-//             return NotificationTile(
-//               notification: notificationItem,
-//               onTap: () async {
-//                 // Đánh dấu thông báo là đã đọc
-//                 await notificationService.markNotificationAsRead(notificationItem.id);
-//                 // Cập nhật danh sách thông báo
-//                 (context as Element).reassemble(); // Cách tạm thời để cập nhật trạng thái
-//               },
-//             );
-//           },
-//         );
-//       },
-//     );
-//   }
-// }
-
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({Key? key}) : super(key: key);
 
@@ -111,11 +68,11 @@ class NotificationTile extends StatelessWidget {
     onTap(); // Gọi hàm onTap khi click vào thông báo
 
     if (notification.type == 'message') {
-      // Lấy thông tin người dùng từ Firestore
+      // Lấy thông tin user từ Firestore
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(notification.senderId).get();
       User user = User.fromSnap(userDoc); // Chuyển đổi sang đối tượng User
 
-      // Điều hướng đến ChatScreen với thông tin người dùng
+      // Điều hướng đến ChatScreen với thông tin user
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ChatScreen(user: user),

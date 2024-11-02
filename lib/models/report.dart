@@ -29,7 +29,7 @@ class Report {
   static Report fromSnap(DocumentSnapshot snap) {
     var snapshot = snap.data() as Map<String, dynamic>;
     return Report(
-      id: snapshot['id'], // Lấy id từ snapshot
+      id: snapshot['id'],
       videoId: snapshot['videoId'],
       videoUrl: snapshot['videoUrl'],
       userId: snapshot['userId'],

@@ -30,7 +30,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
   void initState() {
     super.initState();
     postTime = widget.video.date;
-    _checkIfReposted(); // Gọi hàm kiểm tra trạng thái repost
+    _checkIfReposted(); // Gọi hàm ktr trạng thái repost
   }
 
   @override
@@ -86,7 +86,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                   } : () {
                     Navigator.of(context).pop();
                     _showEditExpiredMessage(); // Hiển thị thông báo quá hạn
-                  }), // Bấm vào nếu không thể chỉnh sửa
+                  }),
                   const SizedBox(width: 16),
                   _buildIcon(Icons.delete, "Remove", onTap: () {
                     _confirmDelete(context, widget.video.id, widget.video.thumbnail);
@@ -95,7 +95,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                 const SizedBox(width: 16),
                 _buildIcon(Icons.link, "Copy link", onTap: () {
                   Navigator.of(context).pop();
-                  _copyLink(context, widget.video.videoUrl); // Pass context here
+                  _copyLink(context, widget.video.videoUrl);
                 }),
                 const SizedBox(width: 16),
                 _buildIcon(Icons.download, "Save video", onTap: () {
@@ -122,7 +122,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
                 _buildIcon(Icons.heart_broken, "Not interested"),
                 const SizedBox(width: 16),
                 _buildIcon(Icons.share, "Share", onTap: () {
-                  _shareVideo(widget.video.videoUrl); // Chia sẻ video
+                  _shareVideo(widget.video.videoUrl);
                 }),
               ],
             ),
@@ -185,7 +185,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     if (videoDoc.exists) {
       var reposts = videoDoc.data()?['reposts'] as List;
       isReposted.value = reposts.contains(authController.user.uid);
-      print("Reposted status: $isReposted"); // Thêm log để kiểm tra
+      print("Reposted status: $isReposted"); // Thêm log để ktra
     }
   }
 
@@ -208,13 +208,13 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
   }
 
   void _downloadVideo(BuildContext context, String videoUrl) async {
-    // Kiểm tra quyền truy cập
+    // Ktra quyền truy cập
     var status = await Permission.storage.request();
     if (status.isGranted) {
       try {
         // Lấy đường dẫn lưu video
         final directory = await getApplicationDocumentsDirectory();
-        final filePath = '${directory.path}/video.mp4'; // Đặt tên file tùy ý
+        final filePath = '${directory.path}/video.mp4';
 
         // Tải video xuống
         await Dio().download(videoUrl, filePath);
@@ -259,7 +259,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Đóng hộp thoại
+                Navigator.of(context).pop();
               },
               child: const Text(
                 'Cancel',
@@ -268,7 +268,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
             ),
             TextButton(
               onPressed: () async {
-                await videoController.deleteVideo(videoId, thumbnail); // Gọi hàm xoá video
+                await videoController.deleteVideo(videoId, thumbnail);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Video deleted successfully!')),
                 );

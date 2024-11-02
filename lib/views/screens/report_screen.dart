@@ -30,7 +30,7 @@ class ReportScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
-                  Navigator.of(context).pop(); // Quay lại
+                  Navigator.of(context).pop();
                 },
               ),
               const Text(
@@ -40,7 +40,7 @@ class ReportScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () {
-                  Navigator.of(context).pop(); // Đóng màn hình
+                  Navigator.of(context).pop();
                 },
               ),
             ],
@@ -58,7 +58,7 @@ class ReportScreen extends StatelessWidget {
           const SizedBox(height: 20),
           // Options
           Expanded(
-            child: SingleChildScrollView( // Thêm SingleChildScrollView để cuộn
+            child: SingleChildScrollView( //SingleChildScrollView => cuộn
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -85,7 +85,7 @@ class ReportScreen extends StatelessWidget {
     );
   }
 
-  // Method to build each option and navigate to ReportScreen2
+  // Method xây dựng từng tùy chọn và điều hướng đến ReportScreen2
   Widget buildOption(BuildContext context, String title) {
     return Column(
       children: [

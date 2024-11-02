@@ -61,7 +61,7 @@ class LoginScreen extends StatelessWidget {
                     icon: Icons.lock,
                     isObscure: true,
                   ),
-                  const SizedBox(height: 10), // Khoảng cách trước 'Forgot Password'
+                  const SizedBox(height: 10),
                   InkWell(
                     onTap: () {
                       Navigator.of(context).push(

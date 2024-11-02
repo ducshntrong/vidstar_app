@@ -12,7 +12,7 @@ class SearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Đặt lại trạng thái tìm kiếm khi màn hình được hiển thị
+    // Đặt lại trạng thái search khi màn hình được hiển thị
     WidgetsBinding.instance.addPostFrameCallback((_) {
       searchController.resetSearch(); // Gọi hàm reset
     });

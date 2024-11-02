@@ -28,7 +28,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
   final NotificationService notificationService = Get.find<NotificationService>();
   late final CommentController commentController;
   final ScrollController _scrollController = ScrollController();
-  final FocusNode _focusNode = FocusNode(); // Thêm FocusNode
+  final FocusNode _focusNode = FocusNode();
   String? replyingToCommentId;
 
   @override
@@ -57,7 +57,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
 
   // Hàm để hiển thị hộp thoại tùy chọn
   void showCommentOptions(BuildContext context, Comment comment) {
-    final isMyComment = comment.uid == authController.user.uid; // Kiểm tra uid của bình luận
+    final isMyComment = comment.uid == authController.user.uid; // Kiểm tra uid của cmt
 
     showModalBottomSheet(
       context: context,
@@ -77,13 +77,13 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   Navigator.pop(context);
                 },
               ),
-              // Hiển thị tùy chọn "Edit" và "Delete" nếu đó là bình luận của người dùng
+              // Hiển thị tùy chọn "Edit" và "Delete" nếu đó là bình luận của user
               if (isMyComment) ...[
                 ListTile(
                   leading: const Icon(Icons.edit),
                   title: const Text('Edit'),
                   onTap: () {
-                    Navigator.pop(context); // Đóng bottom sheet trước
+                    Navigator.pop(context);
                     _showEditDialog(context, comment);
                   },
                 ),
@@ -91,7 +91,6 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   leading: const Icon(Icons.delete),
                   title: const Text('Delete'),
                   onTap: () {
-                    // Xử lý xóa bình luận
                     commentController.deleteComment(comment.id);
                     Navigator.pop(context);
                   },
@@ -101,7 +100,6 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   leading: const Icon(Icons.report),
                   title: const Text('Report'),
                   onTap: () {
-                    // Xử lý báo cáo bình luận
                     Navigator.pop(context);
                   },
                 ),
@@ -119,26 +117,26 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.grey[900], // Màu nền tối
+          backgroundColor: Colors.grey[900],
           title: const Text(
             'Edit Comment',
-            style: TextStyle(color: Colors.white), // Màu chữ trắng
+            style: TextStyle(color: Colors.white),
           ),
           content: Container(
             width: double.maxFinite, // Chiều rộng tối đa
             child: TextField(
               controller: _editController,
-              style: const TextStyle(color: Colors.white), // Màu chữ
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Enter your comment',
-                hintStyle: TextStyle(color: Colors.grey[400]), // Màu chữ nhạt
+                hintStyle: TextStyle(color: Colors.grey[400]),
                 filled: true,
-                fillColor: Colors.grey[800], // Màu nền cho TextField
+                fillColor: Colors.grey[800],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.all(16.0), // Padding cho TextField
+                contentPadding: const EdgeInsets.all(16.0),
               ),
             ),
           ),
@@ -147,7 +145,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Cancel', style: TextStyle(color: Colors.redAccent)), // Màu chữ đỏ cho Cancel
+              child: const Text('Cancel', style: TextStyle(color: Colors.redAccent)),
             ),
             TextButton(
               onPressed: () {
@@ -157,9 +155,9 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                 } else {
                   Get.snackbar('Error', 'Comment cannot be empty');
                 }
-                Navigator.pop(context); // Đóng dialog
+                Navigator.pop(context);
               },
-              child: const Text('Save', style: TextStyle(color: Colors.blueAccent)), // Màu chữ xanh cho Save
+              child: const Text('Save', style: TextStyle(color: Colors.blueAccent)),
             ),
           ],
         );
@@ -220,7 +218,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                     return GestureDetector(
                       onLongPress: () {
                         HapticFeedback.mediumImpact();
-                        showCommentOptions(context, comment); // Bình luận cha
+                        showCommentOptions(context, comment);
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -235,7 +233,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                               onReply: () {
                                 setState(() {
                                   replyingToCommentId = comment.id;
-                                  _commentController.clear(); // Xóa nội dung trước đó
+                                  _commentController.clear();
                                 });
                                 _focusNode.requestFocus();
                                 Future.delayed(Duration(milliseconds: 100), () {
@@ -258,7 +256,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                     );
                   }
 
-                  return SizedBox.shrink(); // Không hiển thị nếu không phải bình luận cha
+                  return SizedBox.shrink(); // k hiển thị nếu k phải bình luận cha
                 },
               );
             }),
@@ -298,9 +296,9 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                         ),
                         border: InputBorder.none,
                       ),
-                      keyboardType: TextInputType.multiline, // Cho phép nhập nhiều dòng
-                      maxLines: null, // Cho phép không giới hạn dòng
-                      minLines: 1, // Số dòng tối thiểu
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      minLines: 1,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -338,7 +336,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // Chỉ hiển thị nút "Cancel" khi đang trả lời bình luận
+                  // Chỉ hiển thị nút "Cancel" khi đang trả lời cmt
                   if (replyingToCommentId != null)
                     GestureDetector(
                       onTap: () {
@@ -399,7 +397,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   datePublished: reply.datePublished.toDate(),
                   onReply: () {
                     replyingToCommentId = reply.id;
-                    _focusNode.requestFocus(); // Yêu cầu focus cho TextField
+                    _focusNode.requestFocus();
                     Future.delayed(Duration(milliseconds: 100), () {
                       _scrollController.animateTo(
                         _scrollController.position.maxScrollExtent,

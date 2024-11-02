@@ -11,9 +11,9 @@ class CommentWidget extends StatelessWidget {
   final VoidCallback onReply;
   final VoidCallback onLike;
   final String uid;
-  final List<String> likes; // Danh sách UID của những người thích
-  final bool isReply; // Tham số để xác định bình luận trả lời
-  final String authorId; // Tham số mới để xác định bình luận của tác giả video
+  final List<String> likes; // Ds UID của những người thích
+  final bool isReply; // Tham số để xác định cmt trả lời
+  final String authorId; // Tham số mới để xác định cmt của tác giả video
 
   const CommentWidget({
     Key? key,
@@ -34,7 +34,7 @@ class CommentWidget extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Avatar người dùng
+        // Avatar user
         InkWell(
           onTap: () {
             Navigator.of(context).push(
@@ -56,7 +56,7 @@ class CommentWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Tên người dùng
+                // Tên user
                 Row(
                   children: [
                     InkWell(
@@ -76,7 +76,7 @@ class CommentWidget extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Hiển thị chữ "Tác giả" nếu bình luận của tác giả video
+                    // Hiển thị chữ creator nếu cmt la của tác giả video
                     if (uid == authorId) ...[
                       Text(
                         ' • Creator',
@@ -86,7 +86,6 @@ class CommentWidget extends StatelessWidget {
                   ],
                 ),
 
-                // Nội dung bình luận
                 Text(
                   comment,
                   style: TextStyle(
@@ -100,7 +99,6 @@ class CommentWidget extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Thời gian và nút trả lời
                     Row(
                       children: [
                         Icon(Icons.access_time, size: 14, color: Colors.grey[400]),
@@ -113,7 +111,7 @@ class CommentWidget extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Hiển thị nút "Reply" chỉ khi không phải là bình luận trả lời
+                        // Hiển thị nút reply chỉ khi không phải là bình luận trả lời
                         if (!isReply) ...[
                           Icon(Icons.quickreply, size: 14, color: Colors.grey[400]),
                           const SizedBox(width: 4),
@@ -136,7 +134,7 @@ class CommentWidget extends StatelessWidget {
             ),
           ),
         ),
-        // Biểu tượng tim và số lượt thích
+
         Column(
           children: [
             InkWell(

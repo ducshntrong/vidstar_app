@@ -31,13 +31,13 @@ class SearchControler extends GetxController {
   void searchUser(String typedUser) async {
     if (typedUser.isEmpty) {
       _getAllVideos(); // Gọi lại hàm để lấy tất cả video
-      _searchedUsers.value = []; // Reset danh sách người dùng
+      _searchedUsers.value = []; // Reset danh sách user
       return;
     }
 
     String lowerCaseTypedUser = typedUser.toLowerCase();
 
-    // Tìm kiếm người dùng
+    // Tìm kiếm user
     _searchedUsers.bindStream(
       firestore.collection('users').snapshots().map((QuerySnapshot query) {
         return query.docs
@@ -59,7 +59,7 @@ class SearchControler extends GetxController {
   }
 
   void resetSearch() {
-    // Xóa danh sách người dùng và video đã tìm kiếm
+    // Xóa danh sách user và video đã tìm kiếm
     _searchedUsers.value = [];
     _searchedVideos.value = [];
     _getAllVideos();

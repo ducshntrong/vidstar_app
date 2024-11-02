@@ -9,31 +9,31 @@ import '../service/NotificationService.dart';
 import 'package:http/http.dart' as http;
 
 class ChatController extends GetxController {
-  // Danh sách tin nhắn trong đoạn chat hiện tại
+  // Ds tin nhắn trong đoạn chat hiện tại
   final RxList<Message> _messages = RxList<Message>([]);
   List<Message> get messages => _messages;
 
-  // Danh sách người dùng để tìm kiếm
+  // Ds user để tìm kiếm
   final Rx<List<User>> _users = Rx<List<User>>([]);
   List<User> get users => _users.value;
 
-  // Tìm kiếm người dùng theo tên hoặc lấy tất cả ngoại trừ người dùng hiện tại
+  // Tìm kiếm user theo tên hoặc lấy tất cả ngoại trừ user hiện tại
   void searchUsers(String keyword) {
     String lowerCaseTypedUser = keyword.toLowerCase();
 
     if (keyword.isEmpty) {
-      fetchUsers(); // Gọi lại hàm để lấy tất cả người dùng nếu không nhập từ khóa
+      fetchUsers(); // Gọi lại hàm để lấy tất cả user nếu không nhập từ khóa
       return;
     }
 
     _users.bindStream(
       firestore.collection('users').snapshots().map((QuerySnapshot query) {
-        // Lọc và chuyển đổi danh sách người dùng
+        // Lọc và chuyển đổi ds user
         List<User> users = query.docs
             .where((elem) =>
         elem['name'] != null &&
             elem['name'].toLowerCase().contains(lowerCaseTypedUser) &&
-            elem['uid'] != authController.user.uid) // Loại bỏ người dùng hiện tại
+            elem['uid'] != authController.user.uid) // Loại bỏ user hiện tại
             .map((elem) => User.fromSnap(elem))
             .toList();
 
@@ -47,22 +47,22 @@ class ChatController extends GetxController {
           return 0;
         });
 
-        return users; // Trả về danh sách đã sắp xếp
+        return users;
       }),
     );
   }
 
-  // Lấy tất cả người dùng ngoại trừ người dùng hiện tại
+  // ham ấy tất cả người dùng ngoại trừ user hiện tại
   void fetchUsers() {
     _users.bindStream(
       firestore.collection('users').snapshots().map((snapshot) {
-        // Chuyển đổi snapshot thành danh sách người dùng
+        // Chuyển đổi snapshot thành ds user
         List<User> users = snapshot.docs
-            .where((doc) => doc['uid'] != authController.user.uid) // Lọc người dùng
+            .where((doc) => doc['uid'] != authController.user.uid) // Lọc user
             .map((doc) => User.fromSnap(doc)) // Chuyển đổi từng doc thành User
             .toList();
 
-        // Sắp xếp danh sách người dùng theo tình trạng isOnline
+        // Sắp xếp ds user theo tình trạng isOnline
         users.sort((a, b) {
           // Nếu a là online và b là offline, a xếp trước b
           if (a.isOnline && !b.isOnline) return -1;
@@ -72,7 +72,7 @@ class ChatController extends GetxController {
           return 0;
         });
 
-        return users; // Trả về danh sách đã sắp xếp
+        return users;
       }),
     );
   }
@@ -200,25 +200,25 @@ class ChatController extends GetxController {
       'isRead': false,
     }, SetOptions(merge: true)); // Sử dụng merge để giữ lại các trường khác
 
-    // Gửi thông báo cho người nhận tin nhắn
+    // Gửi thông báo cho ng nhận tin nhắn
     if (senderId != receiverId) {
       DocumentSnapshot userDoc = await firestore.collection('users').doc(senderId).get();
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
 
       // Tạo ID cho thông báo
-      String notificationId = 'Notification_$receiverId'; // Sử dụng ID của người nhận để xác định thông báo
+      String notificationId = 'Notification_$receiverId'; // Sử dụng ID của ng nhận để xác định thông báo
 
-      // Kiểm tra xem thông báo đã tồn tại chưa
+      // Ktra xem thông báo đã tồn tại chưa
       DocumentSnapshot notificationDoc = await firestore.collection('notifications').doc(notificationId).get();
 
       if (notificationDoc.exists) {
-        // Nếu thông báo đã tồn tại, cập nhật
+        // Nếu thông báo đã tồn tại=>update
         await notificationService.updateNotification(
           Notifications(
             id: notificationId,
             profileImage: userData['profilePhoto'],
             username: userData['name'],
-            content: " sent you a message.", // Nội dung tin nhắn
+            content: " sent you a message.",
             date: DateTime.now(),
             recipientId: receiverId,
             videoId: '',
@@ -228,13 +228,13 @@ class ChatController extends GetxController {
           ),
         );
       } else {
-        // Nếu không tồn tại, tạo mới
+        // Nếu k tồn tại, tạo mới
         await notificationService.createNotification(
           Notifications(
             id: notificationId,
             profileImage: userData['profilePhoto'],
             username: userData['name'],
-            content: " sent you a message.", // Nội dung tin nhắn
+            content: " sent you a message.",
             date: DateTime.now(),
             recipientId: receiverId,
             videoId: '',
@@ -248,11 +248,12 @@ class ChatController extends GetxController {
 
     // // Gửi thông báo cho người nhận tin nhắn
     // if (senderId != receiverId) {
-    //   DocumentSnapshot userDoc = await firestore.collection('users').doc(receiverId).get();
-    //   String? fcmToken = userDoc['fcmToken']; // Lấy token FCM của người nhận
+    //   DocumentSnapshot receiverDoc = await FirebaseFirestore.instance.collection('users').doc(receiverId).get();
+    //   String? receiverFcmToken = receiverDoc.data()?['fcmToken']; // Lấy FCM token của người nhận
     //
-    //   if (fcmToken != null) {
-    //     await notificationService.sendPushNotification(fcmToken, message, senderId);
+    //   if (receiverFcmToken != null) {
+    //     // Gửi thông báo FCM
+    //     await notificationService.sendNotification(receiverFcmToken, "${userData['name']} sent you a message.", senderId);
     //   }
     // }
   }

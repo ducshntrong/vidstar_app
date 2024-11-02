@@ -11,12 +11,12 @@ import 'auth_controller.dart';
 
 class VideoController extends GetxController {
   final Rx<List<Video>> _videoList = Rx<List<Video>>([]);
-  final Rx<List<Video>> _followingVideoList = Rx<List<Video>>([]); // Danh sách video người theo dõi
+  final Rx<List<Video>> _followingVideoList = Rx<List<Video>>([]); // Ds video người theo dõi
   var currentVideo = Rx<Video?>(null); // Biến để lưu video hiện tại
   var currentPage = 0.obs; // Biến trạng thái cho trang hiện tại
 
   List<Video> get videoList => _videoList.value;
-  List<Video> get followingVideoList => _followingVideoList.value; // Getter cho danh sách video người theo dõi
+  List<Video> get followingVideoList => _followingVideoList.value; // Getter cho ds video người theo dõi
   final NotificationService notificationService;
 
   VideoController(this.notificationService);
@@ -32,21 +32,21 @@ class VideoController extends GetxController {
         for (var element in query.docs) {
           retVal.add(Video.fromSnap(element));
         }
-        // Sắp xếp danh sách video theo trường date (giảm dần)
+        // Sắp xếp ds video theo trường date (giảm dần)
         retVal.sort((a, b) => b.date.compareTo(a.date));
 
         return retVal;
       }),
     );
 
-    // Lấy video của những người theo dõi
+    // Lấy video của những ng theo dõi
     getFollowingVideos();
   }
 
   Future<void> getFollowingVideos() async {
     var uid = authController.user.uid;
 
-    // Lấy danh sách UID của người theo dõi
+    // Lấy ds UID của ng theo dõi
     var followingCollection = await firestore
         .collection('users')
         .doc(uid)
@@ -56,7 +56,7 @@ class VideoController extends GetxController {
     List<String> followingUserIds = followingCollection.docs.map((doc) => doc.id).toList();
 
     if (followingUserIds.isNotEmpty) {
-      // Lấy video của những người theo dõi
+      // Lấy video của những ng theo dõi
       _followingVideoList.bindStream(
         firestore.collection('videos')
             .where('uid', whereIn: followingUserIds)
@@ -115,7 +115,7 @@ class VideoController extends GetxController {
         'likes': FieldValue.arrayRemove([uid]),
       });
 
-      // Cập nhật danh sách video đã thích
+      // Cập nhật ds video đã thích
       await firestore.collection('users').doc(uid).update({
         'likedVideos': FieldValue.arrayRemove([id]),
       });
@@ -126,7 +126,7 @@ class VideoController extends GetxController {
         'likes': FieldValue.arrayUnion([uid]),
       });
 
-      // Cập nhật danh sách video đã thích
+      // Cập nhật ds video đã thích
       await firestore.collection('users').doc(uid).update({
         'likedVideos': FieldValue.arrayUnion([id]),
       });
@@ -146,13 +146,21 @@ class VideoController extends GetxController {
             senderId: uid,
           ),
         );
+
+        // // Gửi thông báo FCM
+        // DocumentSnapshot videoOwnerDoc = await firestore.collection('users').doc(videoOwnerId).get();
+        // String? videoOwnerFcmToken = (videoOwnerDoc.data() as Map<String, dynamic>)['fcmToken']; // Lấy FCM token của người nhận
+        //
+        // if (videoOwnerFcmToken != null) {
+        //   await notificationService.sendNotification(videoOwnerFcmToken, "$username liked your video.", username);
+        // }
       }
     }
   }
 
   Future<void> reportVideo(String videoId, String videoUrl, String userId, String reason) async {
     try {
-      // Tạo ID cho báo cáo (có thể sử dụng Firestore auto-generated ID hoặc tự tạo)
+      // Tạo ID cho report
       String reportId = FirebaseFirestore.instance.collection('reports').doc().id;
 
       // Tạo đối tượng Report
@@ -168,10 +176,8 @@ class VideoController extends GetxController {
       // Gửi báo cáo lên Firestore
       await FirebaseFirestore.instance.collection('reports').doc(reportId).set(report.toJson());
 
-      // Thông báo thành công
       print("Report submitted successfully with ID: $reportId");
     } catch (e) {
-      // Xử lý lỗi
       print("Failed to submit report: $e");
     }
   }
@@ -182,31 +188,31 @@ class VideoController extends GetxController {
     var userDoc = await firestore.collection('users').doc(uid).get();
     String username = userDoc.data()!['name'];
 
-    // Kiểm tra xem video đã được repost chưa
+    // Ktr video đã được repost chưa
     bool isReposted = (doc.data()! as Map<String, dynamic>)['reposts'].contains(uid);
     String videoOwnerId = (doc.data()! as Map<String, dynamic>)['uid'];
 
     if (isReposted) {
       // Nếu đã repost, hủy repost
       await firestore.collection('videos').doc(id).update({
-        'reposts': FieldValue.arrayRemove([uid]), // Xóa UID khỏi danh sách reposts
+        'reposts': FieldValue.arrayRemove([uid]), // Xóa UID khỏi ds reposts
       });
 
-      // Cập nhật danh sách video đã repost của người dùng
+      // Cập nhật ds video đã repost của user
       await firestore.collection('users').doc(uid).update({
-        'repostedVideos': FieldValue.arrayRemove([id]), // Xóa ID video khỏi danh sách repost
+        'repostedVideos': FieldValue.arrayRemove([id]), // Xóa ID video khỏi ds repost
       });
 
       await notificationService.deleteNotification(videoOwnerId, uid, "repost", " reposted your video.");
     } else {
       // Nếu chưa repost, thực hiện repost
       await firestore.collection('videos').doc(id).update({
-        'reposts': FieldValue.arrayUnion([uid]), // Thêm UID vào danh sách reposts
+        'reposts': FieldValue.arrayUnion([uid]), // Thêm UID vào ds reposts
       });
 
-      // Cập nhật danh sách video đã repost của người dùng
+      // Cập nhật ds video đã repost của user
       await firestore.collection('users').doc(uid).update({
-        'repostedVideos': FieldValue.arrayUnion([id]), // Thêm ID video vào danh sách repost
+        'repostedVideos': FieldValue.arrayUnion([id]), // Thêm ID video vào ds repost
       });
 
       if (uid != videoOwnerId) {
@@ -224,6 +230,14 @@ class VideoController extends GetxController {
             senderId: uid,
           ),
         );
+
+        // Gửi thông báo FCM
+        // DocumentSnapshot videoOwnerDoc = await firestore.collection('users').doc(videoOwnerId).get();
+        // String? videoOwnerFcmToken = (videoOwnerDoc.data() as Map<String, dynamic>)['fcmToken']; // Ép kiểu
+        //
+        // if (videoOwnerFcmToken != null) {
+        //   await notificationService.sendNotification(videoOwnerFcmToken, "$username reposted your video.", username);
+        // }
       }
     }
   }
@@ -231,8 +245,8 @@ class VideoController extends GetxController {
   Future<void> editVideoField(String videoId, String newCaption, String newSongName) async {
     try {
       await firestore.collection('videos').doc(videoId).update({
-        'caption': newCaption,  // Sử dụng chuỗi cho tên trường
-        'songName': newSongName  // Sử dụng chuỗi cho tên trường
+        'caption': newCaption,
+        'songName': newSongName
       });
       Get.snackbar('Success', 'Updated successfully!');
     } catch (e) {

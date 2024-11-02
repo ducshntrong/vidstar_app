@@ -187,7 +187,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       String lastMessageSenderId,
       bool isRead,
       bool isOnline) {
-    // Kiểm tra xem tin nhắn là của người gửi hay người nhận
+    // Ktra tin nhắn là của ng gửi hay ng nhận
     String displayMessage = lastMessageSenderId == authController.user.uid
         ? 'You: $message'
         : message;
@@ -241,10 +241,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(time, style: TextStyle(color: Colors.grey, fontSize: 12)),
-          // Hiển thị dấu chấm đỏ nếu tin nhắn chưa đọc
           if (lastMessageSenderId != authController.user.uid && !isRead)
             Container(
-              margin: const EdgeInsets.only(top: 4), // Khoảng cách giữa thời gian và dấu chấm
+              margin: const EdgeInsets.only(top: 4),
               width: 11,
               height: 11,
               decoration: const BoxDecoration(

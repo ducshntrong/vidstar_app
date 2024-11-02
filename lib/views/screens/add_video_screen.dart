@@ -87,7 +87,7 @@ class AddVideoScreen extends StatelessWidget {
             width: 190,
             height: 50,
             decoration: BoxDecoration(color: buttonColor,
-              borderRadius: BorderRadius.circular(25), // Bo góc
+              borderRadius: BorderRadius.circular(25),
               boxShadow: const [
                 BoxShadow(
                   color: Colors.black26,

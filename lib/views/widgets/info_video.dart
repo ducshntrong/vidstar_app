@@ -23,16 +23,16 @@ class _CaptionWidgetState extends State<CaptionWidget> {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // Hiện username chỉ khi caption không rỗng
-            if (widget.video.caption.isNotEmpty || widget.video.songName.isNotEmpty)
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
               InkWell(
                 onTap: () {
-                  // Điều hướng đến trang cá nhân của người dùng
+                  // Điều hướng đến trang cá nhân của user
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => ProfileScreen(uid: widget.video.uid),
@@ -49,56 +49,56 @@ class _CaptionWidgetState extends State<CaptionWidget> {
                 ),
               ),
 
-            // Hiện caption
-            if (widget.video.caption.isNotEmpty) ...[
-              Text(
-                _isExpanded ? widget.video.caption :
-                (widget.video.caption.length > 25 ?
-                '${widget.video.caption.substring(0, 25)}...' : widget.video.caption),
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Color(0xf3f3f3f3),
-                ),
-              ),
-              // Hiện nút "Xem thêm"
-              if (widget.video.caption.length > 25)
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _isExpanded = !_isExpanded; // Chuyển đổi trạng thái
-                    });
-                  },
-                  child: Text(
-                    _isExpanded ? 'Hide' : 'See more',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.bold,
-                    ),
+              // Hiện caption
+              if (widget.video.caption.isNotEmpty) ...[
+                Text(
+                  _isExpanded ? widget.video.caption :
+                  (widget.video.caption.length > 25 ?
+                  '${widget.video.caption.substring(0, 25)}...' : widget.video.caption),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xf3f3f3f3),
                   ),
                 ),
-            ],
+                // Hiện nút see more
+                if (widget.video.caption.length > 25)
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isExpanded = !_isExpanded; // Chuyển đổi trạng thái
+                      });
+                    },
+                    child: Text(
+                      _isExpanded ? 'Hide' : 'See more',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
 
-            // Hiện biểu tượng nhạc chỉ khi songName không rỗng
-            if (widget.video.songName.isNotEmpty) ...[
-              Row(
-                children: [
-                  const Icon(
-                    Icons.music_note,
-                    size: 15,
-                    color: Colors.white,
-                  ),
-                  Text(
-                    widget.video.songName,
-                    style: const TextStyle(
-                      fontSize: 14,
+              if (widget.video.songName.isNotEmpty) ...[
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.music_note,
+                      size: 15,
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ],
-              ),
+                    Text(
+                      widget.video.songName,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

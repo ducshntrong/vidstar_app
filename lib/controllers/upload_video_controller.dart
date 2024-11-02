@@ -54,45 +54,9 @@ class UploadVideoController extends GetxController {
   var uploadProgress = 0.0.obs; // Biến theo dõi tiến độ tải lên
   var isUploading = false.obs; // Biến trạng thái tải lên
 
-  // uploadVideo(String songName, String caption, String videoPath) async {
-  //   try {
-  //     isUploading.value = true; // Bắt đầu tải lên
-  //     String uid = firebaseAuth.currentUser!.uid;
-  //     DocumentSnapshot userDoc =
-  //     await firestore.collection('users').doc(uid).get();
-  //     var allDocs = await firestore.collection('videos').get();
-  //     int len = allDocs.docs.length;
-  //     String videoId = FirebaseFirestore.instance.collection('videos').doc().id;
-  //     String videoUrl = await _uploadVideoToStorage(videoId, videoPath);
-  //     String thumbnail = await _uploadImageToStorage(videoId, videoPath);
-  //
-  //     Video video = Video(
-  //       username: (userDoc.data()! as Map<String, dynamic>)['name'],
-  //       uid: uid,
-  //       id: videoId,
-  //       likes: [],
-  //       reposts: [],
-  //       commentCount: 0,
-  //       shareCount: 0,
-  //       songName: songName,
-  //       caption: caption,
-  //       videoUrl: videoUrl,
-  //       profilePhoto: (userDoc.data()! as Map<String, dynamic>)['profilePhoto'],
-  //       thumbnail: thumbnail,
-  //       date: DateTime.now(),
-  //     );
-  //
-  //     await firestore.collection('videos').doc(videoId).set(video.toJson());
-  //     Get.back();
-  //   } catch (e) {
-  //     Get.snackbar('Error Uploading Video', e.toString());
-  //   } finally {
-  //     isUploading.value = false; // Kết thúc tải lên
-  //   }
-  // }
   Future<void> uploadVideo(String songName, String caption, String videoPath, BuildContext context) async {
     try {
-      isUploading.value = true; // Bắt đầu tải lên
+      isUploading.value = true;
       uploadProgress.value = 0.0; // Đặt lại tiến độ
 
       String uid = firebaseAuth.currentUser!.uid;

@@ -26,7 +26,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final NotificationService notificationService = Get.find<NotificationService>();
-  // Khởi tạo ProfileController với NotificationService
+  // Khởi tạo ProfileController vs NotificationService
   late final ProfileController profileController;
 
   late PageController _pageController;
@@ -63,13 +63,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           }
           final user = controller.user2.value;
-          // Kiểm tra xem người dùng hiện tại có phải là chủ sở hữu không
+          // Ktra xem user hiện tại có phải là chủ sở hữu k
           bool isCurrentUser = widget.uid == authController.user.uid;
           return Scaffold(
             appBar: AppBar(
               backgroundColor: Colors.black12,
               actions: [
-                if (isCurrentUser) // Nếu là người dùng hiện tại, hiển thị biểu tượng chỉnh sửa
+                if (isCurrentUser) // Nếu là user hiện tại, hiển thị biểu tượng chỉnh sửa
                   IconButton(
                     icon: const Icon(Icons.menu),
                     onPressed: () {},
@@ -223,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center, // Căn giữa các nút
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 ElevatedButton(
                                   onPressed: () {
@@ -236,12 +236,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   style: ElevatedButton.styleFrom(
                                     foregroundColor: Colors.white,
                                     backgroundColor: widget.uid == authController.user.uid
-                                        ? const Color(0xFF565454) // Màu cho Sign Out
+                                        ? const Color(0xFF565454)
                                         : controller.user['isFollowing']
-                                        ? const Color(0xFF565454) // Màu cho Unfollow
-                                        : const Color(0xFFEE104C), // Màu cho Follow
+                                        ? const Color(0xFF565454)
+                                        : const Color(0xFFEE104C),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10), // Bo góc
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
                                   child: Text(
@@ -256,28 +256,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 10), // Khoảng cách giữa hai nút
+                                SizedBox(width: 10),
                                 ElevatedButton(
                                   onPressed: () {
                                     if (widget.uid == authController.user.uid) {
-                                      // Nếu là người dùng hiện tại, chuyển đến trang UpdateScreen
+                                      // Nếu là user hiện tại, chuyển đến trang UpdateScreen
                                       Get.to(() => UpdateScreen());
                                     } else {
-                                      // Nếu không phải, thực hiện chức năng gửi tin nhắn
+                                      // Nếu k phải, thực hiện chức năng gửi tin nhắn
                                       Get.to(() => ChatScreen(user: user));
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     foregroundColor: Colors.white,
-                                    backgroundColor: const Color(0xFF565454), // Màu cho nút
+                                    backgroundColor: const Color(0xFF565454),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10), // Bo góc
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
                                   child: Text(
                                     widget.uid == authController.user.uid
-                                        ? 'Edit Profile' // Nếu là người dùng, hiển thị nút Edit Profile
-                                        : 'Message', // Nếu không phải, hiển thị nút Message
+                                        ? 'Edit Profile'
+                                        : 'Message',
                                     style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
@@ -365,11 +365,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               );
                                             },
                                             child: Card(
-                                              elevation: 4, // Thêm hiệu ứng bóng
+                                              elevation: 4,
                                               child: Stack(
                                                 children: [
                                                   AspectRatio(
-                                                    aspectRatio: 1 / 1, // Tùy chỉnh tỷ lệ khung hình theo nhu cầu
+                                                    aspectRatio: 1 / 1,
                                                     child: ClipRRect(
                                                       child: CachedNetworkImage(
                                                         imageUrl: thumbnail,
@@ -425,7 +425,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       decoration: BoxDecoration(
         color: _currentPage == index ? Colors.red : Colors.transparent,
-        borderRadius: BorderRadius.circular(30), // Bo góc cho icon
+        borderRadius: BorderRadius.circular(30),
         border: Border.all(
           color: _currentPage == index ? Colors.red : Colors.grey,
           width: 2,

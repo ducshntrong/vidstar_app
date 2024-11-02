@@ -26,7 +26,7 @@ class EditPostScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.grey),
           onPressed: () {
-            Navigator.pop(context); // Quay lại trang trước
+            Navigator.pop(context);
           },
         ),
         centerTitle: true,
@@ -59,30 +59,29 @@ class EditPostScreen extends StatelessWidget {
                           decoration: InputDecoration(
                             hintText: 'Enter caption...',
                             hintStyle: TextStyle(color: Colors.grey),
-                            border: InputBorder.none, // Không có viền
-                            fillColor: Colors.grey[900], // Màu nền ô nhập
+                            border: InputBorder.none,
+                            fillColor: Colors.grey[900],
                           ),
                           style: TextStyle(color: Colors.white, fontSize: 16),
                           controller: captionController,
-                          maxLines: 5, // Tối đa 5 hàng
-                          minLines: 3, // Tối thiểu 3 hàng
+                          maxLines: 5,
+                          minLines: 3,
                         ),
                         SizedBox(height: 4),
-                        // TextField cho tên bài hát
                         TextField(
                           decoration: InputDecoration(
                             hintText: 'Enter Song Name',
                             hintStyle: TextStyle(color: Colors.grey),
-                            border: InputBorder.none, // Không có viền
-                            filled: true, // Làm đầy nền
-                            fillColor: Colors.grey[900], // Màu nền ô nhập
+                            border: InputBorder.none,
+                            filled: true,
+                            fillColor: Colors.grey[900],
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8.0), // Bo góc
-                              borderSide: BorderSide.none, // Không có viền khi không được chọn
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: BorderSide.none,
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8.0), // Bo góc
-                              borderSide: BorderSide.none, // Không có viền khi được chọn
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: BorderSide.none,
                             ),
                             prefixIcon: const Icon(
                               Icons.music_note,
@@ -105,10 +104,10 @@ class EditPostScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8), // Bo tròn các góc
+                    borderRadius: BorderRadius.circular(8),
                     child: CachedNetworkImage(
-                      imageUrl: video.thumbnail, // Sử dụng thumbnail từ video
-                      fit: BoxFit.cover, // Hình ảnh sẽ chiếm toàn bộ không gian
+                      imageUrl: video.thumbnail,
+                      fit: BoxFit.cover,
                       placeholder: (context, url) => const CircularProgressIndicator(),
                       errorWidget: (context, url, error) => const Icon(Icons.error),
                     ),
@@ -184,10 +183,10 @@ class EditPostScreen extends StatelessWidget {
                   // Gọi hàm editVideoField khi nhấn nút Save
                   await videoController.editVideoField(
                     video.id, // ID video
-                    captionController.text, // Caption mới
-                    songNameController.text, // Tên bài hát mới
+                    captionController.text,
+                    songNameController.text,
                   );
-                  Navigator.pop(context); // Quay lại sau khi lưu
+                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink,

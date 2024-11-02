@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -8,69 +9,6 @@ import '../../controllers/auth_controller.dart';
 import '../../service/NotificationService.dart';
 import '../../service/UserStatusService.dart';
 
-// class HomeScreen extends StatefulWidget {
-//   const HomeScreen({Key? key}) : super(key: key);
-//
-//   @override
-//   State<HomeScreen> createState() => _HomeScreenState();
-// }
-//
-// class _HomeScreenState extends State<HomeScreen> {
-//   int pageIdx = 0;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: pages[pageIdx],
-//       bottomNavigationBar: Container(
-//         decoration: const BoxDecoration(
-//           color: backgroundColor,
-//           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.black26,
-//               blurRadius: 8.0,
-//               offset: Offset(0, -2),
-//             ),
-//           ],
-//         ),
-//         child: BottomNavigationBar(
-//           onTap: (idx) {
-//             setState(() {
-//               pageIdx = idx;
-//             });
-//           },
-//           type: BottomNavigationBarType.fixed,
-//           selectedItemColor: Colors.red,
-//           unselectedItemColor: Colors.white70,
-//           currentIndex: pageIdx,
-//           items: const [
-//             BottomNavigationBarItem(
-//               icon: Icon(Icons.home, size: 30),
-//               label: 'Home',
-//             ),
-//             BottomNavigationBarItem(
-//               icon: Icon(Icons.search, size: 30),
-//               label: 'Search',
-//             ),
-//             BottomNavigationBarItem(
-//               icon: CustomIcon(),
-//               label: '',
-//             ),
-//             BottomNavigationBarItem(
-//               icon: Icon(Icons.indeterminate_check_box, size: 30),
-//               label: 'Inbox',
-//             ),
-//             BottomNavigationBarItem(
-//               icon: Icon(Icons.person, size: 30),
-//               label: 'Profile',
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -83,9 +21,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
   int newNotificationCount = 0; // Biến để lưu số lượng thông báo mới
   late UserStatusService userStatusService;
 
+
   @override
   void initState() {
     super.initState();
+    // Lắng nghe sự kiện khi token FCM thay đổi
+    // FirebaseMessaging.onTokenRefresh.listen((newToken) async {
+    //   // Cập nhật token mới vào Firestore
+    //   String uid = authController.user.uid; // Lấy UID của người dùng
+    //   await firestore.collection('users').doc(uid).update({
+    //     'fcmToken': newToken,
+    //   });
+    // });
+
     userStatusService = UserStatusService(firestore, Get.find<AuthController>().user.uid);
     WidgetsBinding.instance.addObserver(this);
     userStatusService.setOnline();
@@ -114,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
 
     notificationService.getNotificationsStream(recipientId).listen((notifications) {
       setState(() {
-        // Kiểm tra số lượng thông báo mới
+        // Ktra số lượng thông báo mới
         newNotificationCount = notifications.where((notification) => !notification.isRead).length;
       });
     });
@@ -122,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
 
   void _onInboxTapped() {
     setState(() {
-      // Khi nhấn vào tab Inbox, đặt số lượng thông báo mới về 0
+      // Khi click vào tab Inbox, đặt số lượng thông báo mới về 0
       newNotificationCount = 0;
     });
   }
@@ -148,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
             setState(() {
               pageIdx = idx;
 
-              // Khi nhấn vào tab Inbox, gọi hàm xử lý
+              // Khi click vào tab Inbox, gọi hàm xử lý
               if (idx == 3) {
                 _onInboxTapped();
               }
@@ -181,18 +129,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
                       top: newNotificationCount > 9 ? -1 : -4, // Điều chỉnh vị trí
                       child: Container(
                         padding: newNotificationCount > 9
-                            ? EdgeInsets.all(1) // Padding nhỏ hơn
-                            : EdgeInsets.all(2.5), // Padding lớn hơn cho số nhỏ
+                            ? EdgeInsets.all(1)
+                            : EdgeInsets.all(2.5),
                         decoration: BoxDecoration(
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Text(
-                            newNotificationCount > 99 ? '99+' : newNotificationCount.toString(), // Hiện số lượng
+                            newNotificationCount > 99 ? '99+' : newNotificationCount.toString(),
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: newNotificationCount > 9 ? 8 : 9, // Thay đổi kích thước chữ
+                              fontSize: newNotificationCount > 9 ? 8 : 9,
                             ),
                           ),
                         ),

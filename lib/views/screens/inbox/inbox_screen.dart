@@ -20,7 +20,6 @@ class InboxScreen extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              // Container chứa TabBar
               Container(
                 color: Colors.white10,
                 child: const TabBar(

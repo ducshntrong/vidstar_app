@@ -70,7 +70,7 @@ class User {
 //     this.phoneNumber,
 //     this.birthDate,
 //     this.gender,
-//     this.fcmToken, // Thêm tham số fcmToken vào constructor
+//     this.fcmToken,
 //   });
 //
 //   Map<String, dynamic> toJson() => {
@@ -81,7 +81,7 @@ class User {
 //     "phoneNumber": phoneNumber,
 //     "birthDate": birthDate?.toIso8601String(),
 //     "gender": gender,
-//     "fcmToken": fcmToken, // Thêm fcmToken vào JSON
+//     "fcmToken": fcmToken,
 //   };
 //
 //   static User fromSnap(DocumentSnapshot snap) {

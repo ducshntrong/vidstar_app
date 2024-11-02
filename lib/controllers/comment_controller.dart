@@ -44,7 +44,7 @@ class CommentController extends GetxController {
 
   Future<void> postComment(String commentText, {String? parentId}) async {
     try {
-      // Kiểm tra xem nội dung bình luận có rỗng không
+      // Kiểm tra xem nội dung bình luận có rỗng k
       if (commentText.isNotEmpty) {
         // Lấy thông tin người dùng
         DocumentSnapshot userDoc = await firestore
@@ -85,7 +85,7 @@ class CommentController extends GetxController {
         // Lấy ID của chủ video
         String videoOwnerId = (await firestore.collection('videos').doc(_postId).get()).data()!['uid'];
 
-        // Tạo thông báo khi bình luận nếu không phải bình luận của chính mình
+        // Tạo thông báo khi bình luận nếu k phải bình luận của chính mình
         if (authController.user.uid != videoOwnerId) {
           await notificationService.createNotification(
             Notifications(
@@ -101,9 +101,17 @@ class CommentController extends GetxController {
               senderId: authController.user.uid,
             ),
           );
+
+          // Gửi thông báo FCM
+          // DocumentSnapshot videoOwnerDoc = await firestore.collection('users').doc(videoOwnerId).get();
+          // String? videoOwnerFcmToken = (videoOwnerDoc.data() as Map<String, dynamic>)['fcmToken'];
+          //
+          // if (videoOwnerFcmToken != null) {
+          //   await notificationService.sendNotification(videoOwnerFcmToken, "${userData['name']} commented on your video.", userData['name']);
+          // }
         }
 
-        // Nếu đây là bình luận trả lời, tạo thông báo cho người dùng của bình luận cha
+        // Nếu đây là bình luận trả lời, tạo thông báo cho user của bình luận cha
         if (parentId != null) {
           DocumentSnapshot parentCommentDoc = await firestore
               .collection('videos')
@@ -131,6 +139,14 @@ class CommentController extends GetxController {
                 senderId: authController.user.uid,
               ),
             );
+
+            // Gửi thông báo FCM cho bình luận cha
+            // DocumentSnapshot parentUserDoc = await firestore.collection('users').doc(parentUserId).get();
+            // String? parentUserFcmToken = (parentUserDoc.data() as Map<String, dynamic>)['fcmToken'];
+            //
+            // if (parentUserFcmToken != null) {
+            //   await notificationService.sendNotification(parentUserFcmToken, "${userData['name']} replied to your comment.", userData['name']);
+            // }
           }
         }
 
@@ -180,9 +196,9 @@ class CommentController extends GetxController {
       // Xóa thông báo khi bỏ thích
       await notificationService.deleteNotification(
           commentOwnerId, // ID của người sở hữu bình luận
-          uid, // ID của người bỏ thích
+          uid, // ID của ng bỏ thích
           "likeComment", // Loại thông báo
-          " liked your comment." // Nội dung thông báo
+          " liked your comment." // Nd thông báo
       );
     } else {
       // Nếu chưa thích, thêm vào
@@ -195,30 +211,38 @@ class CommentController extends GetxController {
         'likes': FieldValue.arrayUnion([uid]),
       });
 
-      // Kiểm tra xem người dùng có phải là chủ bình luận không
+      // Ktra user có phải là chủ bình luận không
       if (uid != commentOwnerId) {
-        // Tạo thông báo khi thích bình luận nếu không phải bình luận của chính mình
+        // Tạo thông báo khi thích cmt nếu không phải cmt của chính mình
         await notificationService.createNotification(
           Notifications(
-            id: 'Notification_${DateTime.now().millisecondsSinceEpoch}', // Tạo ID duy nhất
+            id: 'Notification_${DateTime.now().millisecondsSinceEpoch}',
             profileImage: userData['profilePhoto'],
             username: username,
             content: " liked your comment.",
             date: DateTime.now(),
-            recipientId: commentOwnerId, // ID của chủ bình luận
+            recipientId: commentOwnerId, // ID của chủ cmt
             videoId: _postId, // ID video liên quan
             isRead: false, // Mặc định là chưa đọc
             type: "likeComment",
-            senderId: uid, // ID của người gửi thông báo
+            senderId: uid, // ID của ng gửi thông báo
           ),
         );
+
+        // Gửi thông báo FCM
+        // DocumentSnapshot commentOwnerDoc = await firestore.collection('users').doc(commentOwnerId).get();
+        // String? commentOwnerFcmToken = (commentOwnerDoc.data() as Map<String, dynamic>)['fcmToken'];
+        //
+        // if (commentOwnerFcmToken != null) {
+        //   await notificationService.sendNotification(commentOwnerFcmToken, "$username liked your comment.", username);
+        // }
       }
     }
   }
 
   deleteComment(String commentId) async {
     try {
-      // Lấy thông tin bình luận để xác định người sở hữu bình luậns
+      // Lấy thông tin cmt để xác định ng sở hữu cmt
       DocumentSnapshot commentDoc = await firestore
           .collection('videos')
           .doc(_postId)
@@ -239,7 +263,7 @@ class CommentController extends GetxController {
       String videoOwnerId = (await firestore.collection('videos').doc(_postId).get()).data()!['uid'];
       var uid = authController.user.uid;
 
-      // Lấy tất cả bình luận con trước khi xóa bình luận cha
+      // Lấy tất cả cmt con trước khi xóa bình luận cha
       QuerySnapshot childCommentsSnapshot = await firestore
           .collection('videos')
           .doc(_postId)
@@ -247,24 +271,24 @@ class CommentController extends GetxController {
           .where('parentId', isEqualTo: commentId)
           .get();
 
-      // Xóa tất cả bình luận con và thông báo liên quan
+      // Xóa tất cả cmt con và thông báo liên quan
       for (var doc in childCommentsSnapshot.docs) {
         // Lấy thông tin bình luận con
         Map<String, dynamic> childCommentData = doc.data() as Map<String, dynamic>;
         String childCommentOwnerId = childCommentData['uid'];
 
-        // Xóa thông báo liên quan đến bình luận con
+        // Xóa thông báo liên quan đến cmt con
         await notificationService.deleteNotification(
-            childCommentOwnerId, // ID của người sở hữu bình luận con
-            uid, // ID của người xóa bình luận
+            childCommentOwnerId, // ID của người sở hữu cmt con
+            uid, // ID của người xóa cmt
             "reply", // Loại thông báo
             " replied to your comment." // Nội dung thông báo
         );
 
-        await doc.reference.delete(); // Xóa bình luận con
+        await doc.reference.delete(); // Xóa cmt con
       }
 
-      // Xóa bình luận cha khỏi Firestore
+      // Xóa cmt cha khỏi Firestore
       await firestore
           .collection('videos')
           .doc(_postId)
@@ -272,26 +296,26 @@ class CommentController extends GetxController {
           .doc(commentId)
           .delete();
 
-      // Cập nhật số lượng bình luận trong video
+      // Cập nhật số lượng cmt trong video
       DocumentSnapshot videoDoc = await firestore.collection('videos').doc(_postId).get();
       int currentCommentCount = (videoDoc.data()! as Map<String, dynamic>)['commentCount'] ?? 0;
       await firestore.collection('videos').doc(_postId).update({
-        'commentCount': currentCommentCount - 1 - childCommentsSnapshot.docs.length, // Cập nhật số lượng bình luận
+        'commentCount': currentCommentCount - 1 - childCommentsSnapshot.docs.length, // Cập nhật số lượng cmt
       });
 
-      // Xóa thông báo liên quan đến bình luận
-      if (uid != videoOwnerId) { // Kiểm tra xem người xóa không phải là chủ video
+      // Xóa thông báo liên quan đến cmt
+      if (uid != videoOwnerId) { // Ktra xem ng xóa k phải là chủ video
         await notificationService.deleteNotification(
-            videoOwnerId, // ID của người sở hữu video
-            uid, // ID của người xóa bình luận
+            videoOwnerId, // ID của ng sở hữu video
+            uid, // ID của ng xóa bình luận
             "comment", // Loại thông báo
             " commented on your video." // Nội dung thông báo
         );
       }
 
-      // Xóa thông báo liên quan đến bình luận trả lời
+      // Xóa thông báo liên quan đến cmt trả lời
       if (commentData['parentId'] != null) {
-        // Nếu bình luận này là bình luận trả lời, lấy ID của bình luận cha
+        // Nếu bình luận này là cmt trả lời, lấy ID của cmt cha
         String parentId = commentData['parentId'];
         DocumentSnapshot parentCommentDoc = await firestore
             .collection('videos')
@@ -306,10 +330,10 @@ class CommentController extends GetxController {
 
           if (uid != parentUserId) {
             await notificationService.deleteNotification(
-                parentUserId, // ID của người sở hữu bình luận cha
-                uid, // ID của người xóa bình luận
+                parentUserId, // ID của người sở hữu cmt cha
+                uid, // ID của người xóa cmt
                 "reply", // Loại thông báo
-                " replied to your comment." // Nội dung thông báo
+                " replied to your comment." // Ndthông báo
             );
           }
         }
@@ -336,7 +360,7 @@ class CommentController extends GetxController {
         return;
       }
 
-      // Cập nhật nội dung bình luận
+      // Cập nhật nội dung cmt
       await firestore
           .collection('videos')
           .doc(_postId)
@@ -344,7 +368,7 @@ class CommentController extends GetxController {
           .doc(commentId)
           .update({
         'comment': updatedCommentText.trim(),
-        'datePublished': DateTime.now(), // Cập nhật thời gian nếu cần
+        'datePublished': DateTime.now(),
       });
 
     } catch (e) {

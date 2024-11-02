@@ -1,19 +1,19 @@
 import 'package:timeago/timeago.dart' as timeago;
 
 class Notifications {
-  String id; // ID của thông báo
-  String profileImage; // URL hoặc đường dẫn đến ảnh hồ sơ
-  String username; // Tên người dùng gửi thông báo
-  String content; // Nội dung thông báo
-  DateTime date; // Thời gian thông báo được tạo
-  String recipientId; // ID của người nhận thông báo
-  String videoId; // ID của video liên quan đến thông báo
-  bool isRead; // Kiểm tra xem thông báo đã được xem hay chưa
-  String type; // Loại thông báo (like, comment, follow)
-  String senderId; // ID của người gửi thông báo
+  String id;
+  String profileImage;
+  String username;
+  String content;
+  DateTime date;
+  String recipientId;
+  String videoId;
+  bool isRead;
+  String type;
+  String senderId;
 
   Notifications({
-    required this.id, // Thêm ID vào constructor
+    required this.id,
     required this.profileImage,
     required this.username,
     required this.content,
@@ -40,7 +40,7 @@ class Notifications {
 
   static Notifications fromJson(Map<String, dynamic> json) {
     return Notifications(
-      id: json['id'], // Thêm ID vào từ JSON
+      id: json['id'],
       profileImage: json['profileImage'],
       username: json['username'],
       content: json['content'],

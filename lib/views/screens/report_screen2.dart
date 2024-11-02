@@ -6,12 +6,12 @@ import '../../controllers/video_controller.dart';
 class ReportScreen2 extends StatelessWidget {
   final Video video;
   final String reason;
-  final VideoController videoController; // Thêm VideoController
+  final VideoController videoController;
 
   ReportScreen2({
     required this.video,
     required this.reason,
-    required this.videoController, // Nhận VideoController
+    required this.videoController,
   });
   @override
   Widget build(BuildContext context) {
@@ -52,15 +52,15 @@ class ReportScreen2 extends StatelessWidget {
                       duration: Duration(seconds: 2), // Thời gian hiển thị
                     ),
                   );
-                  Navigator.of(context).pop(); // Đóng màn hình
+                  Navigator.of(context).pop();
                 },
                 child: const Text('Send'),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // Bo góc
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  backgroundColor: Color(0xFFEE104C), // Màu nền hồng
-                  padding: const EdgeInsets.symmetric(horizontal: 150, vertical: 12), // Điều chỉnh padding
+                  backgroundColor: Color(0xFFEE104C),
+                  padding: const EdgeInsets.symmetric(horizontal: 150, vertical: 12),
                   textStyle: const TextStyle(fontSize: 16),
                   foregroundColor: Colors.white,
                 ),

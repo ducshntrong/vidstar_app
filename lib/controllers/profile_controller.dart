@@ -16,11 +16,11 @@ class ProfileController extends GetxController {
   final NotificationService notificationService;
   ProfileController(this.notificationService);
 
-  // Khai báo biến để lưu danh sách followers và following
+  // Khai báo biến để lưu ds followers và following
   final Rx<List<Map<String, dynamic>>> _followers = Rx<List<Map<String, dynamic>>>([]);
   final Rx<List<Map<String, dynamic>>> _following = Rx<List<Map<String, dynamic>>>([]);
 
-  // Getter để truy cập danh sách followers và following
+  // Getter để truy cập ds followers và following
   List<Map<String, dynamic>> get followers => _followers.value;
   List<Map<String, dynamic>> get following => _following.value;
 
@@ -36,7 +36,7 @@ class ProfileController extends GetxController {
 
   final Rx<User> user2 = User(uid: '', name: 'Unknown', email: '', profilePhoto: '').obs;
 
-  // Phương thức lấy người dùng từ UID
+  // Phương thức lấy user từ UID
   void getUserFromUID(String uid) async {
     final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
     if (userDoc.exists) {
@@ -51,7 +51,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  // Phương thức để lấy danh sách followers
+  // Phương thức để lấy ds followers
   Future<void> getFollowers() async {
     try {
       var followerDocs = await firestore
@@ -71,7 +71,7 @@ class ProfileController extends GetxController {
     }
   }
 
-// Phương thức để lấy danh sách following
+// Phương thức để lấy ds following
   Future<void> getFollowing() async {
     try {
       var followingDocs = await firestore
@@ -95,15 +95,15 @@ class ProfileController extends GetxController {
     try {
       List<String> thumbnails = [];
       List<String> videoIds = [];
-      List<int> likesCounts = []; // Danh sách lưu số lượt thích cho từng video
+      List<int> likesCounts = []; // Ds lưu số lượt thích cho từng video
       List<String> repostThumbnails = [];
       List<String> repostVideoIds = [];
-      List<int> repostLikesCounts = []; // Danh sách lưu số lượt thích cho video đã repost
+      List<int> repostLikesCounts = []; // Ds lưu số lượt thích cho video đã repost
       List<String> likedThumbnails = [];
       List<String> likedVideoIds = [];
-      List<int> likedLikesCounts = []; // Danh sách lưu số lượt thích cho video đã thích
+      List<int> likedLikesCounts = []; // Ds lưu số lượt thích cho video đã thích
 
-      // Lấy video của người dùng
+      // Lấy video của user
       var myVideos = await firestore
           .collection('videos')
           .where('uid', isEqualTo: _uid.value)
@@ -115,7 +115,7 @@ class ProfileController extends GetxController {
 
         // Lấy số lượt thích cho video
         int likeCount = (videoDoc.data()['likes'] as List).length;
-        likesCounts.add(likeCount); // Thêm số lượt thích vào danh sách
+        likesCounts.add(likeCount); // Thêm số lượt thích vào ds
       }
 
       // Lấy thông tin người dùng
@@ -124,7 +124,7 @@ class ProfileController extends GetxController {
         throw Exception("User does not exist");
       }
 
-      // Lấy danh sách video đã repost
+      // Lấy ds video đã repost
       List<String> repostedVideoIds = List<String>.from(userDoc.data()?['repostedVideos'] ?? []);
 
       for (String id in repostedVideoIds) {
@@ -151,17 +151,17 @@ class ProfileController extends GetxController {
         }
       }
 
-      // Lấy thông tin người dùng
+      // Lấy thông tin user
       String name = userDoc.data()?['name'] ?? 'Unknown';
       String profilePhoto = userDoc.data()?['profilePhoto'] ?? '';
       int likes = 0;
 
-      // Tính tổng số lượt thích từ video của người dùng
+      // Tính tổng số lượt thích từ video của user
       for (var item in myVideos.docs) {
         likes += (item.data()['likes'] as List).length;
       }
 
-      // Lấy số lượng người theo dõi và đang theo dõi
+      // Lấy số user theo dõi và đang theo dõi
       var followerDoc = await firestore
           .collection('users')
           .doc(_uid.value)
@@ -173,7 +173,7 @@ class ProfileController extends GetxController {
           .collection('following')
           .get();
 
-      // Cập nhật thông tin người dùng
+      // Cập nhật thông tin user
       _user.value = {
         'followers': followerDoc.docs.length.toString(),
         'following': followingDoc.docs.length.toString(),
@@ -252,7 +252,7 @@ class ProfileController extends GetxController {
       String profilePhoto = userDoc.data()!['profilePhoto'];
 
       if (!doc.exists) {
-        // Nếu chưa theo dõi, thêm vào danh sách theo dõi
+        // Nếu chưa theo dõi, thêm vào ds theo dõi
         await firestore
             .collection('users')
             .doc(_uid.value)
@@ -261,7 +261,7 @@ class ProfileController extends GetxController {
             .set({
           'name': followerName,
           'profilePhoto': profilePhoto,
-          'uid': authController.user.uid, // Lưu UID của người theo dõi
+          'uid': authController.user.uid, // Lưu UID của ng theo dõi
         });
         await firestore
             .collection('users')
@@ -269,9 +269,9 @@ class ProfileController extends GetxController {
             .collection('following')
             .doc(_uid.value)
             .set({
-          'name': _user.value['name'], // Lưu tên của người dùng đang được theo dõi
+          'name': _user.value['name'], // Lưu tên của user đang dc theo dõi
           'profilePhoto': _user.value['profilePhoto'], // Lưu ảnh đại diện
-          'uid': _uid.value, // Lưu UID của người được theo dõi
+          'uid': _uid.value, // Lưu UID của ng dc theo dõi
         });
         _user.value.update(
           'followers',
@@ -286,15 +286,22 @@ class ProfileController extends GetxController {
             username: followerName,
             content: " started following you.",
             date: DateTime.now(),
-            recipientId: _uid.value, // ID của người nhận thông báo
-            videoId: '', // ID video có thể để trống nếu không áp dụng
+            recipientId: _uid.value, // ID của ng nhận thông báo
+            videoId: '', // ID video có thể để trống nếu k áp dụng
             isRead: false, // Mặc định là chưa đọc
             type: "follow",
             senderId: Get.find<AuthController>().user.uid,
           ),
         );
+        // Gửi thông báo FCM
+        // DocumentSnapshot recipientDoc = await firestore.collection('users').doc(_uid.value).get();
+        // String? recipientFcmToken = (recipientDoc.data() as Map<String, dynamic>)['fcmToken']; // Lấy token FCM
+        //
+        // if (recipientFcmToken != null) {
+        //   await notificationService.sendNotification(recipientFcmToken, "$followerName started following you.", followerName);
+        // }
       } else {
-        // Nếu đã theo dõi, xóa khỏi danh sách theo dõi
+        // Nếu đã theo dõi, xóa khỏi ds theo dõi
         await firestore
             .collection('users')
             .doc(_uid.value)
@@ -314,15 +321,15 @@ class ProfileController extends GetxController {
 
         // Xóa thông báo khi hủy theo dõi
         await notificationService.deleteNotification(
-            _uid.value, // ID của người nhận thông báo
-            authController.user.uid, // ID của người hủy theo dõi
+            _uid.value, // ID của ng nhận thông báo
+            authController.user.uid, // ID của ng hủy theo dõi
             "follow", // Loại thông báo
-            " started following you." // Nội dung thông báo
+            " started following you." // Ns thông báo
         );
       }
       _user.value.update('isFollowing', (value) => !value);
 
-      // Gọi hàm getFollowingVideos để cập nhật danh sách video
+      // Gọi hàm getFollowingVideos để cập nhật ds video
       videoController.getFollowingVideos();//18/9
       update();
     } catch (e) {

@@ -16,9 +16,9 @@ class TextInputField extends StatelessWidget {
     required this.labelText,
     this.isObscure = false,
     required this.icon,
-    this.fillColor = const Color(0xFF1E1E1E), // Nền mặc định màu tối
-    this.textColor = Colors.white, // Màu chữ mặc định là trắng
-    this.iconColor = Colors.white, // Màu icon mặc định là trắng
+    this.fillColor = const Color(0xFF1E1E1E),
+    this.textColor = Colors.white,
+    this.iconColor = Colors.white,
   }) : super(key: key);
 
   @override
@@ -26,32 +26,32 @@ class TextInputField extends StatelessWidget {
     return TextField(
       controller: controller,
       style: TextStyle(
-        color: textColor, // Màu chữ của input
+        color: textColor,
       ),
       decoration: InputDecoration(
         labelText: labelText,
         labelStyle: TextStyle(
           fontSize: 18,
-          color: Colors.grey[400], // Màu nhạt khi không focus
+          color: Colors.grey[400],
         ),
         prefixIcon: Icon(
           icon,
-          color: iconColor, // Màu icon
+          color: iconColor,
         ),
         filled: true,
-        fillColor: fillColor, // Nền input
+        fillColor: fillColor,
         contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: Colors.grey[700]!, // Màu đường viền khi không focus
+            color: Colors.grey[700]!,
             width: 1.5,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: Colors.redAccent, // Màu đường viền khi focus
+            color: Colors.redAccent,
             width: 2,
           ),
         ),

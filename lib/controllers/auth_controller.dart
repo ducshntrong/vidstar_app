@@ -61,12 +61,12 @@ class AuthController extends GetxController {
   void registerUser(
       String username, String email, String password, File? image) async {
     try {
-      isLoading.value = true; // Bắt đầu quá trình đăng ký
+      isLoading.value = true;
       if (username.isNotEmpty &&
           email.isNotEmpty &&
           password.isNotEmpty &&
           image != null) {
-        // Save user to Firebase Auth và Firestore
+        // lưu user vao Firebase Auth và Firestore
         UserCredential cred = await firebaseAuth.createUserWithEmailAndPassword(
           email: email,
           password: password,
@@ -94,18 +94,14 @@ class AuthController extends GetxController {
         e.toString(),
       );
     } finally {
-      isLoading.value = false; // Kết thúc quá trình đăng ký
+      isLoading.value = false;
     }
   }
 
-  // void registerUser(
-  //     String username, String email, String password, File? image) async {
+  // Future<void> registerUser(String username, String email, String password, File? image) async {
   //   try {
-  //     if (username.isNotEmpty &&
-  //         email.isNotEmpty &&
-  //         password.isNotEmpty &&
-  //         image != null) {
-  //       // Đăng ký người dùng
+  //     isLoading.value = true; // Bắt đầu quá trình đăng ký
+  //     if (username.isNotEmpty && email.isNotEmpty && password.isNotEmpty && image != null) {
   //       UserCredential cred = await firebaseAuth.createUserWithEmailAndPassword(
   //         email: email,
   //         password: password,
@@ -113,37 +109,32 @@ class AuthController extends GetxController {
   //
   //       // Lấy token FCM
   //       String? fcmToken = await FirebaseMessaging.instance.getToken();
+  //       if (fcmToken == null) {
+  //         Get.snackbar('Error', 'Failed to get FCM token.');
+  //         return;
+  //       }
   //
-  //       // Tải lên hình ảnh và lấy URL
   //       String downloadUrl = await _uploadToStorage(image);
   //       model.User user = model.User(
   //         name: username,
   //         email: email,
   //         uid: cred.user!.uid,
   //         profilePhoto: downloadUrl,
-  //         fcmToken: fcmToken, // Lưu token FCM vào người dùng
+  //         fcmToken: fcmToken,
   //       );
   //
-  //       // Lưu thông tin người dùng vào Firestore
-  //       await firestore
-  //           .collection('users')
-  //           .doc(cred.user!.uid)
-  //           .set(user.toJson());
+  //       await firestore.collection('users').doc(cred.user!.uid).set(user.toJson());
   //     } else {
-  //       Get.snackbar(
-  //         'Error Creating Account',
-  //         'Please enter all the fields',
-  //       );
+  //       Get.snackbar('Error Creating Account', 'Please enter all the fields');
   //     }
   //   } catch (e) {
-  //     Get.snackbar(
-  //       'Error Creating Account',
-  //       e.toString(),
-  //     );
+  //     Get.snackbar('Error Creating Account', e.toString());
+  //   } finally {
+  //     isLoading.value = false; // Kết thúc quá trình đăng ký
   //   }
   // }
 
-  var isLoading = false.obs; // Biến trạng thái tải lên
+  var isLoading = false.obs;
   Future<void> updateUser({
     String? name,
     String? phoneNumber,
@@ -152,10 +143,10 @@ class AuthController extends GetxController {
     File? profilePhoto,
   }) async {
     try {
-      isLoading.value = true; // Bắt đầu quá trình cập nhật
+      isLoading.value = true;
       String? downloadUrl;
 
-      // Nếu có hình ảnh mới, tải lên và nhận URL
+      // Nếu có ảnh mới, tải và nhận URL
       if (profilePhoto != null) {
         downloadUrl = await _uploadToStorage(profilePhoto);
       }
@@ -169,32 +160,32 @@ class AuthController extends GetxController {
 
       // Cập nhật thông tin người dùng trong Firestore
       await firestore.collection('users').doc(currentFirebaseUser.uid).update({
-        'name': name ?? '', // Cập nhật nếu có giá trị mới
-        'phoneNumber': phoneNumber ?? '', // Cập nhật nếu có giá trị mới
-        'birthDate': birthDate?.toIso8601String() ?? '', // Cập nhật nếu có giá trị mới
-        'gender': gender ?? '', // Cập nhật nếu có giá trị mới
+        'name': name ?? '',
+        'phoneNumber': phoneNumber ?? '',
+        'birthDate': birthDate?.toIso8601String() ?? '',
+        'gender': gender ?? '',
         'profilePhoto': downloadUrl ?? existingPhotoUrl, // Giữ nguyên ảnh cũ nếu không có URL mới
       });
 
-      // Cập nhật tên người dùng trong tất cả video của người dùng
+      // update tên người dùng trong all video của user
       if (name != null) {
         QuerySnapshot videoDocs = await firestore.collection('videos').where('uid', isEqualTo: currentFirebaseUser.uid).get();
         for (var doc in videoDocs.docs) {
           await firestore.collection('videos').doc(doc.id).update({
-            'username': name, // Cập nhật tên người dùng trong video
+            'username': name, // Cập nhật tên user trong video
           });
         }
       }
       // Cập nhật tên trong danh sách followers
       QuerySnapshot followersDocs = await firestore
-          .collection('users')//lấy list những ng theo dõi người dùng hiện tại
+          .collection('users')//lấy list những ng theo dõi user hiện tại
           .doc(currentFirebaseUser.uid)
           .collection('followers')
           .get();
       for (var doc in followersDocs.docs) {
-        //update tên của người dùng hiện tại trong danh sách following của từng follower
+        //update tên của user hiện tại trong danh sách following của từng follower
         await firestore.collection('users').doc(doc.id).collection('following').doc(currentFirebaseUser.uid).update({
-          'name': name, // Cập nhật tên người dùng trong danh sách followers
+          'name': name, // Cập nhật tên user trong ds followers
         });
       }
 
@@ -206,15 +197,15 @@ class AuthController extends GetxController {
           .get();
       for (var doc in followingDocs.docs) {
         await firestore.collection('users').doc(doc.id).collection('followers').doc(currentFirebaseUser.uid).update({
-          'name': name, // Cập nhật tên người dùng trong danh sách following
+          'name': name, // Cập nhật tên user trong danh sách following
         });
       }
 
-      // Cập nhật tên người dùng trong tất cả thông báo
+      // Cập nhật tên user trong tất cả thông báo
       QuerySnapshot notificationDocs = await firestore.collection('notifications').where('senderId', isEqualTo: currentFirebaseUser.uid).get();
       for (var doc in notificationDocs.docs) {
         await firestore.collection('notifications').doc(doc.id).update({
-          'username': name, // Cập nhật tên người dùng trong thông báo
+          'username': name, // Cập nhật tên user trong thông báo
         });
       }
 
@@ -247,6 +238,45 @@ class AuthController extends GetxController {
       isLoading.value = false; // Kết thúc quá trình đăng nhập
     }
   }
+
+  // void loginUser(String email, String password) async {
+  //   try {
+  //     isLoading.value = true; // Bắt đầu quá trình đăng nhập
+  //     if (email.isNotEmpty && password.isNotEmpty) {
+  //       // Đăng nhập người dùng
+  //       UserCredential cred = await firebaseAuth.signInWithEmailAndPassword(
+  //         email: email,
+  //         password: password,
+  //       );
+  //
+  //       // Lấy token FCM mới
+  //       String? fcmToken = await FirebaseMessaging.instance.getToken();
+  //       if (fcmToken != null) {
+  //         // Cập nhật token FCM vào Firestore
+  //         await firestore.collection('users').doc(cred.user!.uid).update({
+  //           'fcmToken': fcmToken,
+  //         });
+  //       }
+  //
+  //       Get.snackbar(
+  //         'Login Successful',
+  //         'Welcome back!',
+  //       );
+  //     } else {
+  //       Get.snackbar(
+  //         'Error Logging in',
+  //         'Please enter all the fields',
+  //       );
+  //     }
+  //   } catch (e) {
+  //     Get.snackbar(
+  //       'Error Logging in',
+  //       e.toString(),
+  //     );
+  //   } finally {
+  //     isLoading.value = false; // Kết thúc quá trình đăng nhập
+  //   }
+  // }
 
   void signOut() async {
     await firebaseAuth.signOut();

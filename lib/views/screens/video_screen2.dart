@@ -34,7 +34,7 @@ class _VideoScreenState extends State<VideoScreen2> {
   @override
   void initState() {
     super.initState();
-    videoController = VideoController(notificationService); // Khởi tạo ở đây
+    videoController = VideoController(notificationService);
     videoController.fetchVideoData(widget.videoId); // Gọi hàm để lấy dữ liệu video
   }
 
@@ -101,7 +101,7 @@ class _VideoScreenState extends State<VideoScreen2> {
 
     return Scaffold(
       body: Obx(() {
-        // Kiểm tra xem video hiện tại có tồn tại không
+        // Ktra xem video hiện tại có tồn tại k
         if (videoController.currentVideo.value == null) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -110,7 +110,7 @@ class _VideoScreenState extends State<VideoScreen2> {
         return PageView.builder(
           controller: PageController(initialPage: 0, viewportFraction: 1),
           scrollDirection: Axis.vertical,
-          physics: const NeverScrollableScrollPhysics(), // Ngăn chặn cuộn
+          physics: const NeverScrollableScrollPhysics(), // Ngăn k cuộn
           itemBuilder: (context, index) {
             return Stack(
               children: [
@@ -137,7 +137,7 @@ class _VideoScreenState extends State<VideoScreen2> {
                               children: [
                                 InkWell(
                                   onTap: () {
-                                    // Điều hướng đến trang cá nhân của người dùng
+                                    // Điều hướng đến trang cá nhân của user
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (context) => ProfileScreen(uid: data.uid),
@@ -168,7 +168,7 @@ class _VideoScreenState extends State<VideoScreen2> {
     );
   }
 
-  // Phương thức xây dựng nút thích
+  // hàm xây dựng nút thích
   Widget _buildLikeButton(Video data) {
     return Column(
       children: [
@@ -190,7 +190,7 @@ class _VideoScreenState extends State<VideoScreen2> {
           child: Image.asset(
             data.likes.contains(authController.user.uid)
                 ? 'assets/love2.png'
-                : 'assets/love.png', // Đường dẫn đến hình ảnh
+                : 'assets/love.png',
             height: 36,
             width: 36,
           ),
@@ -206,12 +206,12 @@ class _VideoScreenState extends State<VideoScreen2> {
     );
   }
 
-  // Phương thức xây dựng nút bình luận
+  // hàm xây dựng nút bình luận
   Widget _buildCommentButton(Video data) {
     return Column(
       children: [
         InkWell(
-          onTap: () => showCommentBottomSheet(context, data.id, data.uid), // Gọi hàm hiển thị BottomSheet
+          onTap: () => showCommentBottomSheet(context, data.id, data.uid),
           child: Image.asset(
             'assets/comments.png',
             height: 32,
@@ -226,14 +226,14 @@ class _VideoScreenState extends State<VideoScreen2> {
     );
   }
 
-  // Phương thức xây dựng nút chia sẻ
+  // hàm xây dựng nút chia sẻ
   Widget _buildShareButton(Video data) {
     return Column(
       children: [
         InkWell(
           onTap: () {
             showModalBottomSheet(
-              context: context, // Đảm bảo context được truyền vào
+              context: context,
               builder: (context) =>
                   CustomBottomSheet(video: data)
             );

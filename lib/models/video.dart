@@ -28,7 +28,7 @@ class Video {
     required this.videoUrl,
     required this.profilePhoto,
     required this.thumbnail,
-    required this.date, // Thêm trường date vào constructor
+    required this.date,
   });
 
   Map<String, dynamic> toJson() => {
@@ -44,7 +44,7 @@ class Video {
     "caption": caption,
     "videoUrl": videoUrl,
     "thumbnail": thumbnail,
-    "date": date.toIso8601String(), // Chuyển đổi DateTime thành chuỗi
+    "date": date.toIso8601String(),
   };
 
   static Video fromSnap(DocumentSnapshot snap) {
@@ -54,16 +54,16 @@ class Video {
       username: snapshot['username'],
       uid: snapshot['uid'],
       id: snapshot['id'],
-      likes: snapshot['likes'] ?? [], // Giá trị mặc định nếu không có
-      reposts: snapshot['reposts'] ?? [], // Giá trị mặc định nếu không có
-      commentCount: snapshot['commentCount'] ?? 0, // Giá trị mặc định nếu không có
-      shareCount: snapshot['shareCount'] ?? 0, // Giá trị mặc định nếu không có
+      likes: snapshot['likes'] ?? [],
+      reposts: snapshot['reposts'] ?? [],
+      commentCount: snapshot['commentCount'] ?? 0,
+      shareCount: snapshot['shareCount'] ?? 0,
       songName: snapshot['songName'] ?? '',
       caption: snapshot['caption'] ?? '',
       videoUrl: snapshot['videoUrl'] ?? '',
       profilePhoto: snapshot['profilePhoto'] ?? '',
       thumbnail: snapshot['thumbnail'] ?? '',
-      date: DateTime.parse(snapshot['date']), // Giả định trường này luôn tồn tại
+      date: DateTime.parse(snapshot['date']),
     );
   }
 }

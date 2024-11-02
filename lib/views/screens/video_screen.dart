@@ -103,8 +103,8 @@ class _VideoScreenState extends State<VideoScreen> {
       child: Scaffold(
         body: Obx(() {
           // Lấy danh sách video từ controller
-          final allVideos = videoController.videoList; // Danh sách video tất cả
-          final followingVideos = videoController.followingVideoList; // Danh sách video người theo dõi
+          final allVideos = videoController.videoList; // Ds all video
+          final followingVideos = videoController.followingVideoList; // Ds video ng theo dõi
 
           return Stack(
             children: [
@@ -117,11 +117,10 @@ class _VideoScreenState extends State<VideoScreen> {
                 children: [
                   // Trang hiển thị tất cả video
                   buildVideoPage(allVideos, context, size),
-                  // Trang hiển thị video người theo dõi
+                  // Trang hiển thị video ng theo dõi
                   buildVideoPage(followingVideos, context, size),
                 ],
               ),
-              // Tiêu đề nằm trên cùng video, căn giữa
               Positioned(
                 top: 20,
                 left: 0,
@@ -135,16 +134,16 @@ class _VideoScreenState extends State<VideoScreen> {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: videoController.currentPage.value == 0 ? Colors.white : Colors.grey, // Thay đổi màu sắc
+                          color: videoController.currentPage.value == 0 ? Colors.white : Colors.grey,
                         ),
                       ),
-                      const SizedBox(width: 20), // Khoảng cách giữa hai văn bản
+                      const SizedBox(width: 20),
                       Text(
                         "Following",
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: videoController.currentPage.value == 1 ? Colors.white : Colors.grey, // Thay đổi màu sắc
+                          color: videoController.currentPage.value == 1 ? Colors.white : Colors.grey,
                         ),
                       ),
                     ],
@@ -193,7 +192,7 @@ class _VideoScreenState extends State<VideoScreen> {
                   children: [
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.only(left: 20),
+                        padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                         child: CaptionWidget(video: data),
                       ),
                     ),
@@ -205,7 +204,7 @@ class _VideoScreenState extends State<VideoScreen> {
                         children: [
                           InkWell(
                             onTap: () {
-                              // Điều hướng đến trang cá nhân của người dùng
+                              // Điều hướng đến trang cá nhân của user
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => ProfileScreen(uid: data.uid),
@@ -221,9 +220,9 @@ class _VideoScreenState extends State<VideoScreen> {
                                   // Gọi hàm likeVideo
                                   videoController.likeVideo(data.id);
 
-                                  // Cập nhật trạng thái
+                                  // update trạng thái
                                   setState(() {
-                                    // Cập nhật likes nếu cần
+                                    // update likes nếu cần
                                     if (data.likes.contains(authController.user.uid)) {
                                       data.likes.remove(authController.user.uid);
                                     } else {
@@ -234,7 +233,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                 child: Image.asset(
                                   data.likes.contains(authController.user.uid)
                                       ? 'assets/love2.png'
-                                      : 'assets/love.png', // Đường dẫn đến hình ảnh
+                                      : 'assets/love.png',
                                   height: 36,
                                   width: 36,
                                 ),
@@ -274,7 +273,7 @@ class _VideoScreenState extends State<VideoScreen> {
                               InkWell(
                                 onTap: () {
                                   showModalBottomSheet(
-                                    context: context, // Đảm bảo context được truyền vào
+                                    context: context,
                                     builder: (context) =>
                                         CustomBottomSheet(video: data),
                                   );

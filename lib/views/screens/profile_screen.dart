@@ -67,29 +67,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           bool isCurrentUser = widget.uid == authController.user.uid;
           return Scaffold(
             appBar: AppBar(
-              backgroundColor: Colors.black12,
-              actions: [
-                if (isCurrentUser) // Nếu là user hiện tại, hiển thị biểu tượng chỉnh sửa
-                  IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () {},
-                  )
-                else
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    onPressed: () {
-                    },
-                  )
-              ],
-              title: Center(
-                child: Text(
-                  controller.user['name'],
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+              backgroundColor: Colors.black87,
+              title: Text(
+                controller.user['name'],
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
+              actions: [
+                IconButton(
+                  icon: Icon(isCurrentUser ? Icons.menu : Icons.more_vert),
+                  onPressed: () {
+                    // Actions for current or other user
+                  },
+                ),
+              ],
+              centerTitle: true,
             ),
             body: SafeArea(
               child: SingleChildScrollView(
@@ -239,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ? const Color(0xFF565454)
                                         : controller.user['isFollowing']
                                         ? const Color(0xFF565454)
-                                        : const Color(0xFFEE104C),
+                                        : primaryColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
@@ -288,7 +282,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           SizedBox(
-                            height: 450,
+                            height: 700,
                             child: Column(
                               children: [
                                 // Hiển thị chỉ số trang hiện tại
@@ -424,17 +418,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildIcon(IconData icon, int index) {
     return Container(
       decoration: BoxDecoration(
-        color: _currentPage == index ? Colors.red : Colors.transparent,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: _currentPage == index ? Colors.red : Colors.grey,
-          width: 2,
-        ),
+        borderRadius: BorderRadius.circular(3),
+
       ),
       padding: const EdgeInsets.all(8),
       child: Icon(
         icon,
-        size: 27,
+        size: 30,
         color: _currentPage == index ? Colors.white : Colors.grey,
       ),
     );

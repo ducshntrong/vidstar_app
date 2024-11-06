@@ -40,7 +40,7 @@ class CustomIcon extends StatelessWidget {
               width: 30,
               height: 30,
               decoration: BoxDecoration(
-                color: Color(0xFF32d1ea),
+                color: Color(0xFF4778FD),
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(

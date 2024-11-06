@@ -96,43 +96,53 @@ class NotificationService {
     }
   }
 
+  // Hàm lấy token FCM
   Future<void> getToken() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     String? token = await messaging.getToken();
 
-    // Lưu token vào Firestore trong tài liệu của user
-    await firestore.collection('users').doc(authController.user.uid).update({
-      'fcmToken': token,
-    });
+    if (token != null) {
+      // Lưu token vào Firestore trong tài liệu của user
+      await firestore.collection('users').doc(authController.user.uid).update({
+        'fcmToken': token,
+      });
+      print('Token FCM đã được lưu thành công: $token');
+    } else {
+      print('Không thể lấy token FCM.');
+    }
   }
 
   // Hàm gửi thông báo FCM
   Future<void> sendNotification(String receiverFcmToken, String message, String senderName) async {
-    final String serverToken = 'YOUR_SERVER_KEY';
+    const String serverToken = 'YOUR_SERVER_KEY'; // Đổi thành biến môi trường khi triển khai
 
-    final response = await http.post(
-      Uri.parse('https://fcm.googleapis.com/fcm/send'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'key=$serverToken',
-      },
-      body: jsonEncode({
-        'to': receiverFcmToken,
-        'notification': {
-          'title': 'New notification from  $senderName',
-          'body': message,
+    try {
+      final response = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'key=$serverToken',
         },
-        'data': {
-          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-          'message': message,
-        },
-      }),
-    );
+        body: jsonEncode({
+          'to': receiverFcmToken,
+          'notification': {
+            'title': 'New notification from $senderName',
+            'body': message,
+          },
+          'data': {
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'message': message,
+          },
+        }),
+      );
 
-    if (response.statusCode != 200) {
-      print('Gửi thông báo thất bại: ${response.body}');
-    } else {
-      print('Thông báo đã được gửi thành công: ${response.body}');
+      if (response.statusCode != 200) {
+        print('Gửi thông báo thất bại: ${response.body}');
+      } else {
+        print('Thông báo đã được gửi thành công: ${response.body}');
+      }
+    } catch (e) {
+      print('Đã xảy ra lỗi khi gửi thông báo: $e');
     }
   }
 }

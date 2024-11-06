@@ -19,12 +19,20 @@ class LoginScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'VidStar',
-              style: TextStyle(
-                fontSize: 35,
-                color: buttonColor,
-                fontWeight: FontWeight.w900,
+            ShaderMask(
+              shaderCallback: (bounds) {
+                return const LinearGradient(
+                  colors: [Color(0xFF0866FF), Color(0xFF00BFFF)],
+                  tileMode: TileMode.clamp,
+                ).createShader(bounds);
+              },
+              child: const Text(
+                'VidStar',
+                style: TextStyle(
+                  fontSize: 35,
+                  fontWeight: FontWeight.w900,
+                  // Không cần chỉ định màu ở đây vì gradient sẽ thay thế
+                ),
               ),
             ),
             const Text(
@@ -87,9 +95,13 @@ class LoginScreen extends StatelessWidget {
             Container(
               width: MediaQuery.of(context).size.width - 40,
               height: 50,
-              decoration: BoxDecoration(
-                color: buttonColor,
-                borderRadius: const BorderRadius.all(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF0866FF), Color(0xFF00BFFF)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.all(
                   Radius.circular(5),
                 ),
               ),
@@ -113,6 +125,7 @@ class LoginScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -139,7 +152,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                   child: Text(
                     'Register',
-                    style: TextStyle(fontSize: 20, color: buttonColor),
+                    style: TextStyle(fontSize: 20, color: Color(0xFF4E8DF8)),
                   ),
                 ),
               ],

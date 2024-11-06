@@ -183,7 +183,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   SizedBox(width: 10),
                   CircleAvatar(
-                    backgroundColor: _isSendButtonEnabled ? Colors.red[400] : Colors.grey,
+                    backgroundColor: _isSendButtonEnabled ? primaryColor : Colors.grey,
                     child: IconButton(
                       icon: Icon(Icons.send, color: Colors.white),
                       onPressed: _isSendButtonEnabled
@@ -234,7 +234,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: EdgeInsets.all(12),
                 margin: EdgeInsets.symmetric(vertical: 5),
                 decoration: BoxDecoration(
-                  color: isSender ? Color(0xFF7A8194) : Color(0xFF2C3342),
+                  color: isSender ? Color(0xFF4778FD) : Color(0xFF2C3342),
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(15),
                     topRight: Radius.circular(15),

@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vidstar_app/SentimentAnalysis.dart';
 import 'package:vidstar_app/constants.dart';
 import 'package:vidstar_app/controllers/auth_controller.dart';
 import 'package:vidstar_app/service/NotificationService.dart';
@@ -24,12 +25,15 @@ void main() async {
   Get.put(notificationService);
 
   // Đăng ký ChatController với NotificationService
-  Get.put(ChatController(notificationService));
+  // Get.put(ChatController(notificationService));
   // final _messaging = FirebaseMessaging.instance;
   // await _messaging.requestPermission();
   // final token = await _messaging.getToken();
   // print('TokenFCM: $token');
 
+  // final SentimentAnalysis commentApi = SentimentAnalysis('http://127.0.0.1:8000/predict_sentiment');
+  // double sentiment = await commentApi.checkComment("bạn Đức đẹp trai quá");
+  // print('Sentiment: $sentiment');
   runApp(const MyApp());
 }
 

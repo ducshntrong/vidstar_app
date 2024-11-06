@@ -80,7 +80,7 @@ class CommentWidget extends StatelessWidget {
                     if (uid == authorId) ...[
                       Text(
                         ' • Creator',
-                        style: TextStyle(color: Colors.red[400],fontSize: 13),
+                        style: TextStyle(color: Color(0xFF00BFFF),fontSize: 13),
                       ),
                     ],
                   ],

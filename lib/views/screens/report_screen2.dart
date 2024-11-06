@@ -59,7 +59,7 @@ class ReportScreen2 extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  backgroundColor: Color(0xFFEE104C),
+                  backgroundColor: Color(0xFF3366FF),
                   padding: const EdgeInsets.symmetric(horizontal: 150, vertical: 12),
                   textStyle: const TextStyle(fontSize: 16),
                   foregroundColor: Colors.white,

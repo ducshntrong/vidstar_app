@@ -179,97 +179,106 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-  Widget _buildChatTile(
-      String name,
-      String message,
-      String profilePhoto,
-      String time,
-      String lastMessageSenderId,
-      bool isRead,
-      bool isOnline) {
-    // Ktra tin nhắn là của ng gửi hay ng nhận
+  Widget _buildChatTile(String name, String message, String profilePhoto,
+      String time, String lastMessageSenderId, bool isRead, bool isOnline,) {
+    // Xác định tin nhắn đến từ ng gửi hay ng nhận
     String displayMessage = lastMessageSenderId == authController.user.uid
         ? 'You: $message'
         : message;
 
-    // Xác định màu sắc cho subtitle dựa trên trạng thái isRead và người gửi
+    // Màu sắc và độ đậm của phông chữ để xem trước tin nhắn dựa trên trạng thái đọc
     Color subtitleColor = (lastMessageSenderId != authController.user.uid && !isRead)
         ? Colors.white
         : Colors.grey;
-
-    // Xác định kiểu chữ cho subtitle
     FontWeight subtitleFontWeight = lastMessageSenderId == authController.user.uid
         ? FontWeight.normal
         : (isRead ? FontWeight.normal : FontWeight.bold);
 
-    return ListTile(
-      leading: Stack(
-        children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundImage: NetworkImage(profilePhoto),
+    // Boolean để theo dõi xem ô hiện đang được nhấn hay không
+    bool _isPressed = false;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return GestureDetector(
+          onLongPress: () {
+            setState(() {
+              _isPressed = true;
+            });
+          },
+          onLongPressEnd: (_) {
+            // Đặt lại trạng thái nhấn khi nhấn và giữ
+            setState(() {
+              _isPressed = false;
+            });
+          },
+          child: Container(
+            color: _isPressed ? Colors.grey[900] : Colors.transparent, // Thay đổi nền khi nhấn
+            child: ListTile(
+              leading: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundImage: NetworkImage(profilePhoto),
+                  ),
+                  if (isOnline)
+                    const Positioned(
+                      bottom: 2,
+                      right: 5,
+                      child: CircleAvatar(
+                        radius: 6,
+                        backgroundColor: Colors.green,
+                      ),
+                    ),
+                ],
+              ),
+              title: Text(
+                name,
+                style: TextStyle(
+                  fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.white,
+                ),
+              ),
+              subtitle: Text(
+                _truncateMessage(displayMessage, 20),
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontWeight: subtitleFontWeight,
+                  fontSize: 14,
+                  color: subtitleColor,
+                ),
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(time, style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  if (lastMessageSenderId != authController.user.uid && !isRead)
+                    Container(
+                      margin: const EdgeInsets.only(top: 4),
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF4778FD),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  if (lastMessageSenderId == authController.user.uid)
+                    if (isRead)
+                      CircleAvatar(
+                        radius: 8,
+                        backgroundImage: NetworkImage(profilePhoto),
+                      )
+                    else
+                      Icon(Icons.check_circle_outline, size: 15),
+                ],
+              ),
+            ),
           ),
-          if (isOnline)
-            const Positioned(
-              bottom: 2,
-              right: 5,
-              child: CircleAvatar(
-                radius: 6,
-                backgroundColor: Colors.green,
-              ),
-            ),
-        ],
-      ),
-      title: Text(
-        name,
-        style: TextStyle(
-          fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
-          fontSize: 15,
-          color: Colors.white,
-        ),
-      ),
-      subtitle: Text(
-        _truncateMessage(displayMessage, 20),
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontWeight: subtitleFontWeight,
-          fontSize: 14,
-          color: subtitleColor,
-        ),
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(time, style: TextStyle(color: Colors.grey, fontSize: 12)),
-          if (lastMessageSenderId != authController.user.uid && !isRead)
-            Container(
-              margin: const EdgeInsets.only(top: 4),
-              width: 11,
-              height: 11,
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-            ),
-          // Chỉ hiển thị biểu tượng hoặc ảnh đại diện nếu tin nhắn là của mình
-          if (lastMessageSenderId != authController.user.uid) ...[
-            SizedBox.shrink(),
-          ] else ...[
-            if (isRead) ...[
-              SizedBox(height: 4),
-              CircleAvatar(
-                radius: 8,
-                backgroundImage: NetworkImage(profilePhoto),
-              ),
-            ] else ...[
-              SizedBox(height: 4),
-              Icon(Icons.check_circle_outline, size: 15),
-            ],
-          ],
-        ],
-      ),
+        );
+      },
     );
   }
+
 
 // Hàm để cắt ngắn tin nhắn
   String _truncateMessage(String message, int maxLength) {

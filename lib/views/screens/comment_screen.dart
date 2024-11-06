@@ -8,7 +8,7 @@ import 'package:vidstar_app/constants.dart';
 import 'package:vidstar_app/controllers/comment_controller.dart';
 import 'package:timeago/timeago.dart' as tago;
 import 'package:vidstar_app/views/screens/profile_screen.dart';
-
+import 'package:vidstar_app/constants.dart';
 import '../../models/comment.dart';
 import '../../service/NotificationService.dart';
 import '../widgets/CommentWidget.dart';
@@ -319,7 +319,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                     child: Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.red, Colors.redAccent],
+                          colors: [Color(0xFF0866FF), Color(0xFF00BFFF)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -349,7 +349,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                       child: const Text(
                         'Cancel',
                         style: TextStyle(
-                          color: Colors.red,
+                          color: Color(0xFF00BFFF),
                           fontWeight: FontWeight.bold,
                         ),
                       ),

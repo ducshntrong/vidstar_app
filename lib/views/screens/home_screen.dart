@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,19 +26,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
   @override
   void initState() {
     super.initState();
-    // Lắng nghe sự kiện khi token FCM thay đổi
-    // FirebaseMessaging.onTokenRefresh.listen((newToken) async {
-    //   // Cập nhật token mới vào Firestore
-    //   String uid = authController.user.uid; // Lấy UID của người dùng
-    //   await firestore.collection('users').doc(uid).update({
-    //     'fcmToken': newToken,
-    //   });
-    // });
+    // Lấy token FCM và thêm vào Firestore
+    //_addFcmToken();
 
     userStatusService = UserStatusService(firestore, Get.find<AuthController>().user.uid);
     WidgetsBinding.instance.addObserver(this);
     userStatusService.setOnline();
     _listenForNotifications();
+  }
+
+  Future<void> _addFcmToken() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    // Lấy token FCM
+    String? token = await messaging.getToken();
+    if (token != null) {
+      String uid = authController.user.uid; // Lấy UID của người dùng
+
+      // Kiểm tra xem token đã tồn tại chưa
+      DocumentSnapshot userDoc = await firestore.collection('users').doc(uid).get();
+      if (!userDoc.exists || userDoc['fcmToken'] == null) {
+        // Nếu tài liệu không tồn tại hoặc không có token, thêm token vào Firestore
+        await firestore.collection('users').doc(uid).set({
+          'fcmToken': token,
+        }, SetOptions(merge: true)); // Merge để không ghi đè các trường khác
+
+        print('Token FCM đã được thêm thành công: $token');
+      } else {
+        print('Token FCM đã tồn tại: ${userDoc['fcmToken']}');
+      }
+    } else {
+      print('Không thể lấy token FCM.');
+    }
   }
 
   @override
@@ -103,16 +123,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
             });
           },
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.red,
+          selectedItemColor: buttonColor,
           unselectedItemColor: Colors.white70,
           currentIndex: pageIdx,
           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home, size: 25),
+              icon: Icon(pageIdx == 0 ? Icons.home : Icons.home_outlined, size: 25),
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search, size: 25),
+              icon: Icon(pageIdx == 1 ? Icons.search : Icons.search_outlined, size: 25),
               label: 'Search',
             ),
             BottomNavigationBarItem(
@@ -122,7 +142,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
             BottomNavigationBarItem(
               icon: Stack(
                 children: [
-                  Icon(Icons.indeterminate_check_box, size: 25),
+                  Icon(
+                    pageIdx == 3 ? Icons.indeterminate_check_box : Icons.indeterminate_check_box_outlined,
+                    size: 25,
+                  ),
                   if (newNotificationCount > 0)
                     Positioned(
                       right: newNotificationCount > 9 ? 0 : 0,
@@ -151,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
               label: 'Inbox',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person, size: 25),
+              icon: Icon(pageIdx == 4 ? Icons.person : Icons.person_outline, size: 25),
               label: 'Profile',
             ),
           ],

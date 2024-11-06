@@ -19,7 +19,8 @@ List pages = [
 
 // COLORS
 const backgroundColor = Colors.black38;
-var buttonColor = Colors.red[400];
+var buttonColor = const Color(0xFF4778FD);
+var primaryColor = const Color(0xFF4778FD);
 const borderColor = Colors.grey;
 
 // FIREBASE

@@ -276,7 +276,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               },
               child: const Text(
                 'Delete',
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: Color(0xFF0866FF)),
               ),
             ),
           ],

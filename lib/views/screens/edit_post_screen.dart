@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:vidstar_app/constants.dart';
 
 import '../../controllers/video_controller.dart';
 import '../../models/video.dart';
@@ -189,7 +190,7 @@ class EditPostScreen extends StatelessWidget {
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.pink,
+                  backgroundColor: primaryColor,
                   padding: EdgeInsets.symmetric(vertical: 16, horizontal: 150),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

@@ -24,8 +24,8 @@ void main() async {
   final notificationService = NotificationService(FirebaseFirestore.instance);
   Get.put(notificationService);
 
-  // Đăng ký ChatController với NotificationService
-  // Get.put(ChatController(notificationService));
+  //Đăng ký ChatController với NotificationService
+  Get.put(ChatController(notificationService));
   // final _messaging = FirebaseMessaging.instance;
   // await _messaging.requestPermission();
   // final token = await _messaging.getToken();

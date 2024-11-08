@@ -103,7 +103,6 @@ class NotificationService {
     String? token = await messaging.getToken();
 
     if (token != null) {
-      // Lưu token vào Firestore trong tài liệu của user
       await firestore.collection('users').doc(authController.user.uid).update({
         'fcmToken': token,
       });

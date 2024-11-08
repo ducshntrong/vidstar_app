@@ -185,7 +185,7 @@ class NotificationService {
       if (response.statusCode != 200) {
         print('Gửi thông báo thất bại: ${response.body}');
       } else {
-        print('Thông báo đã được gửi thành công: ${response.body}');
+        print('Thông báo được gửi thành công: ${response.body}');
       }
     } catch (e) {
       print('Đã xảy ra lỗi khi gửi thông báo: $e');

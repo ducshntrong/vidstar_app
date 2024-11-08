@@ -227,6 +227,15 @@ class ChatController extends GetxController {
             senderId: senderId,
           ),
         );
+        // // Gửi thông báo cho người nhận tin nhắn
+        if (senderId != receiverId) {
+          DocumentSnapshot receiverDoc = await firestore.collection('users').doc(receiverId).get();
+          String? receiverFcmToken = (receiverDoc.data() as Map<String, dynamic>)['fcmToken']; // Ép kiểu
+
+          if (receiverFcmToken != null) {
+            await notificationService.sendNotification(receiverFcmToken, "${userData['name']} sent you a message.", userData['name']);
+          }
+        }
       } else {
         // Nếu k tồn tại, tạo mới
         await notificationService.createNotification(
@@ -243,19 +252,17 @@ class ChatController extends GetxController {
             senderId: senderId,
           ),
         );
+        // // Gửi thông báo cho người nhận tin nhắn
+        if (senderId != receiverId) {
+          DocumentSnapshot receiverDoc = await firestore.collection('users').doc(receiverId).get();
+          String? receiverFcmToken = (receiverDoc.data() as Map<String, dynamic>)['fcmToken']; // Ép kiểu
+
+          if (receiverFcmToken != null) {
+            await notificationService.sendNotification(receiverFcmToken, "${userData['name']} sent you a message.", userData['name']);
+          }
+        }
       }
     }
-
-    // // Gửi thông báo cho người nhận tin nhắn
-    // if (senderId != receiverId) {
-    //   DocumentSnapshot receiverDoc = await FirebaseFirestore.instance.collection('users').doc(receiverId).get();
-    //   String? receiverFcmToken = receiverDoc.data()?['fcmToken']; // Lấy FCM token của người nhận
-    //
-    //   if (receiverFcmToken != null) {
-    //     // Gửi thông báo FCM
-    //     await notificationService.sendNotification(receiverFcmToken, "${userData['name']} sent you a message.", senderId);
-    //   }
-    // }
   }
 }
 

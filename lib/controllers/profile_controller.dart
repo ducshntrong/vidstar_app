@@ -294,12 +294,12 @@ class ProfileController extends GetxController {
           ),
         );
         // Gửi thông báo FCM
-        // DocumentSnapshot recipientDoc = await firestore.collection('users').doc(_uid.value).get();
-        // String? recipientFcmToken = (recipientDoc.data() as Map<String, dynamic>)['fcmToken']; // Lấy token FCM
-        //
-        // if (recipientFcmToken != null) {
-        //   await notificationService.sendNotification(recipientFcmToken, "$followerName started following you.", followerName);
-        // }
+        DocumentSnapshot recipientDoc = await firestore.collection('users').doc(_uid.value).get();
+        String? recipientFcmToken = (recipientDoc.data() as Map<String, dynamic>)['fcmToken']; // Lấy token FCM
+
+        if (recipientFcmToken != null) {
+          await notificationService.sendNotification(recipientFcmToken, "$followerName started following you.", followerName);
+        }
       } else {
         // Nếu đã theo dõi, xóa khỏi ds theo dõi
         await firestore

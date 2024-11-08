@@ -26,37 +26,41 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver{
   @override
   void initState() {
     super.initState();
-    // Lấy token FCM và thêm vào Firestore
-    //_addFcmToken();
-
     userStatusService = UserStatusService(firestore, Get.find<AuthController>().user.uid);
     WidgetsBinding.instance.addObserver(this);
     userStatusService.setOnline();
+    // Lấy token FCM và thêm vào Firestore
+    _addFcmToken();
     _listenForNotifications();
   }
 
   Future<void> _addFcmToken() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission();
+    String uid = authController.user.uid;
 
     // Lấy token FCM
     String? token = await messaging.getToken();
-    if (token != null) {
-      String uid = authController.user.uid; // Lấy UID của người dùng
+    DocumentSnapshot userDoc = await firestore.collection('users').doc(uid).get();
 
-      // Kiểm tra xem token đã tồn tại chưa
-      DocumentSnapshot userDoc = await firestore.collection('users').doc(uid).get();
-      if (!userDoc.exists || userDoc['fcmToken'] == null) {
-        // Nếu tài liệu không tồn tại hoặc không có token, thêm token vào Firestore
+    if (!userDoc.exists) {
+      // Tài liệu chưa tồn tại, tạo mới
+      await firestore.collection('users').doc(uid).set({
+        'fcmToken': token,
+      });
+      print('Tài liệu người dùng đã được tạo và token FCM đã được thêm: $token');
+    } else {
+      // Nếu tài liệu tồn tại, kiểm tra trường fcmToken
+      var data = userDoc.data() as Map<String, dynamic>?; // Ép kiểu về Map<String, dynamic>
+      if (data != null && data['fcmToken'] != null) {
+        print('Token FCM đã tồn tại: ${data['fcmToken']}');
+      } else {
+        // Nếu fcmToken không tồn tại, thêm nó
         await firestore.collection('users').doc(uid).set({
           'fcmToken': token,
-        }, SetOptions(merge: true)); // Merge để không ghi đè các trường khác
-
+        }, SetOptions(merge: true));
         print('Token FCM đã được thêm thành công: $token');
-      } else {
-        print('Token FCM đã tồn tại: ${userDoc['fcmToken']}');
       }
-    } else {
-      print('Không thể lấy token FCM.');
     }
   }
 

@@ -10,6 +10,7 @@ class User {
   String? gender;
   bool isOnline;
   DateTime? lastSeen;
+  String? fcmToken;
 
   User({
     required this.name,
@@ -21,6 +22,7 @@ class User {
     this.gender,
     this.isOnline = false, // Mặc định là offline
     this.lastSeen,
+    this.fcmToken,
   });
 
   Map<String, dynamic> toJson() => {
@@ -33,6 +35,7 @@ class User {
     "gender": gender,
     "isOnline": isOnline,
     "lastSeen": lastSeen?.toIso8601String(),
+    "fcmToken": fcmToken,
   };
 
   static User fromSnap(DocumentSnapshot snap) {
@@ -47,6 +50,7 @@ class User {
       gender: snapshot['gender'],
       isOnline: snapshot['isOnline'] ?? false,
       lastSeen: snapshot['lastSeen'] != null ? (snapshot['lastSeen'] as Timestamp).toDate() : null, // Chuyển đổi Timestamp sang DateTime
+      fcmToken: snapshot.containsKey('fcmToken') ? snapshot['fcmToken'] : null,
     );
   }
 

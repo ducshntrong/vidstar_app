@@ -148,12 +148,13 @@ class VideoController extends GetxController {
         );
 
         // // Gửi thông báo FCM
-        // DocumentSnapshot videoOwnerDoc = await firestore.collection('users').doc(videoOwnerId).get();
-        // String? videoOwnerFcmToken = (videoOwnerDoc.data() as Map<String, dynamic>)['fcmToken']; // Lấy FCM token của người nhận
-        //
-        // if (videoOwnerFcmToken != null) {
-        //   await notificationService.sendNotification(videoOwnerFcmToken, "$username liked your video.", username);
-        // }
+        DocumentSnapshot videoOwnerDoc = await firestore.collection('users').doc(videoOwnerId).get();
+        String? videoOwnerFcmToken = (videoOwnerDoc.data() as Map<String, dynamic>)['fcmToken'];
+        if (videoOwnerFcmToken != null) {
+          await notificationService.sendNotification(videoOwnerFcmToken, "$username liked your video.", username);
+        } else {
+          print('FCM token không tồn tại cho người nhận.');
+        }
       }
     }
   }
@@ -232,12 +233,12 @@ class VideoController extends GetxController {
         );
 
         // Gửi thông báo FCM
-        // DocumentSnapshot videoOwnerDoc = await firestore.collection('users').doc(videoOwnerId).get();
-        // String? videoOwnerFcmToken = (videoOwnerDoc.data() as Map<String, dynamic>)['fcmToken']; // Ép kiểu
-        //
-        // if (videoOwnerFcmToken != null) {
-        //   await notificationService.sendNotification(videoOwnerFcmToken, "$username reposted your video.", username);
-        // }
+        DocumentSnapshot videoOwnerDoc = await firestore.collection('users').doc(videoOwnerId).get();
+        String? videoOwnerFcmToken = (videoOwnerDoc.data() as Map<String, dynamic>)['fcmToken']; // Ép kiểu
+
+        if (videoOwnerFcmToken != null) {
+          await notificationService.sendNotification(videoOwnerFcmToken, "$username reposted your video.", username);
+        }
       }
     }
   }

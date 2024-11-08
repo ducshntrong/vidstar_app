@@ -57,6 +57,21 @@ class AuthController extends GetxController {
     return downloadUrl;
   }
 
+  bool isPasswordValid(String password) {
+    // Kiểm tra độ dài từ 8 đến 16 ký tự
+    if (password.length < 8 || password.length > 16) {
+      return false;
+    }
+
+    // Kiểm tra xem mật khẩu có chứa chữ cái, số và ký tự đặc biệt không
+    bool hasLetter = password.contains(RegExp(r'[A-Za-z]')); // Có chứa chữ cái
+    bool hasDigits = password.contains(RegExp(r'[0-9]'));    // Có chứa số
+    bool hasSpecialCharacters = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]')); // Có chứa ký tự đặc biệt
+
+    // Trả về true nếu mật khẩu đáp ứng tất cả các điều kiện
+    return hasLetter && hasDigits && hasSpecialCharacters;
+  }
+
   // registering the user
   void registerUser(
       String username, String email, String password, File? image) async {
@@ -66,6 +81,15 @@ class AuthController extends GetxController {
           email.isNotEmpty &&
           password.isNotEmpty &&
           image != null) {
+        // Kiểm tra tính hợp lệ của mật khẩu
+        if (!isPasswordValid(password)) {
+          Get.snackbar(
+            'Invalid Password',
+            'Password must be at least 8-16 characters long, contain letters, numbers, and special characters.',
+          );
+          return;
+        }
+
         // lưu user vao Firebase Auth và Firestore
         UserCredential cred = await firebaseAuth.createUserWithEmailAndPassword(
           email: email,
@@ -98,10 +122,23 @@ class AuthController extends GetxController {
     }
   }
 
-  // Future<void> registerUser(String username, String email, String password, File? image) async {
+  // void registerUser(
+  //     String username, String email, String password, File? image) async {
   //   try {
   //     isLoading.value = true; // Bắt đầu quá trình đăng ký
+  //
+  //     // Kiểm tra xem các trường có hợp lệ không
   //     if (username.isNotEmpty && email.isNotEmpty && password.isNotEmpty && image != null) {
+  //       // Kiểm tra tính hợp lệ của mật khẩu
+  //       if (!isPasswordValid(password)) {
+  //         Get.snackbar(
+  //           'Invalid Password',
+  //           'Password must be at least 8-16 characters long, contain letters, numbers, and special characters.',
+  //         );
+  //         return;
+  //       }
+  //
+  //       // Đăng ký người dùng với Firebase Auth
   //       UserCredential cred = await firebaseAuth.createUserWithEmailAndPassword(
   //         email: email,
   //         password: password,
@@ -111,19 +148,25 @@ class AuthController extends GetxController {
   //       String? fcmToken = await FirebaseMessaging.instance.getToken();
   //       if (fcmToken == null) {
   //         Get.snackbar('Error', 'Failed to get FCM token.');
-  //         return;
+  //         return; // Dừng lại nếu không lấy được token
   //       }
   //
+  //       // Tải ảnh lên và lấy URL
   //       String downloadUrl = await _uploadToStorage(image);
+  //
+  //       // Tạo đối tượng người dùng và thêm token FCM
   //       model.User user = model.User(
   //         name: username,
   //         email: email,
   //         uid: cred.user!.uid,
   //         profilePhoto: downloadUrl,
-  //         fcmToken: fcmToken,
+  //         fcmToken: fcmToken, // Lưu token FCM vào đối tượng người dùng
   //       );
   //
+  //       // Lưu người dùng vào Firestore
   //       await firestore.collection('users').doc(cred.user!.uid).set(user.toJson());
+  //
+  //       Get.snackbar('Success', 'User registered successfully!'); // Thông báo thành công
   //     } else {
   //       Get.snackbar('Error Creating Account', 'Please enter all the fields');
   //     }

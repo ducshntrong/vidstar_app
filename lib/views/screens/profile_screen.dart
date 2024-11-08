@@ -329,10 +329,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       }
 
                                       if (thumbnails.isEmpty) {
-                                        return const Center(
-                                          child: Text(
-                                            "No videos available.",
-                                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                                        return const Padding(
+                                          padding: EdgeInsets.only(bottom: 300.0),
+                                          child: Center(
+                                            child: Text(
+                                              "No videos available.",
+                                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                                            ),
                                           ),
                                         );
                                       }

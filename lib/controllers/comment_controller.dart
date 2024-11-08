@@ -103,12 +103,12 @@ class CommentController extends GetxController {
           );
 
           // Gửi thông báo FCM
-          // DocumentSnapshot videoOwnerDoc = await firestore.collection('users').doc(videoOwnerId).get();
-          // String? videoOwnerFcmToken = (videoOwnerDoc.data() as Map<String, dynamic>)['fcmToken'];
-          //
-          // if (videoOwnerFcmToken != null) {
-          //   await notificationService.sendNotification(videoOwnerFcmToken, "${userData['name']} commented on your video.", userData['name']);
-          // }
+          DocumentSnapshot videoOwnerDoc = await firestore.collection('users').doc(videoOwnerId).get();
+          String? videoOwnerFcmToken = (videoOwnerDoc.data() as Map<String, dynamic>)['fcmToken'];
+
+          if (videoOwnerFcmToken != null) {
+            await notificationService.sendNotification(videoOwnerFcmToken, "${userData['name']} commented on your video.", userData['name']);
+          }
         }
 
         // Nếu đây là bình luận trả lời, tạo thông báo cho user của bình luận cha
@@ -141,12 +141,12 @@ class CommentController extends GetxController {
             );
 
             // Gửi thông báo FCM cho bình luận cha
-            // DocumentSnapshot parentUserDoc = await firestore.collection('users').doc(parentUserId).get();
-            // String? parentUserFcmToken = (parentUserDoc.data() as Map<String, dynamic>)['fcmToken'];
-            //
-            // if (parentUserFcmToken != null) {
-            //   await notificationService.sendNotification(parentUserFcmToken, "${userData['name']} replied to your comment.", userData['name']);
-            // }
+            DocumentSnapshot parentUserDoc = await firestore.collection('users').doc(parentUserId).get();
+            String? parentUserFcmToken = (parentUserDoc.data() as Map<String, dynamic>)['fcmToken'];
+
+            if (parentUserFcmToken != null) {
+              await notificationService.sendNotification(parentUserFcmToken, "${userData['name']} replied to your comment.", userData['name']);
+            }
           }
         }
 
@@ -230,12 +230,12 @@ class CommentController extends GetxController {
         );
 
         // Gửi thông báo FCM
-        // DocumentSnapshot commentOwnerDoc = await firestore.collection('users').doc(commentOwnerId).get();
-        // String? commentOwnerFcmToken = (commentOwnerDoc.data() as Map<String, dynamic>)['fcmToken'];
-        //
-        // if (commentOwnerFcmToken != null) {
-        //   await notificationService.sendNotification(commentOwnerFcmToken, "$username liked your comment.", username);
-        // }
+        DocumentSnapshot commentOwnerDoc = await firestore.collection('users').doc(commentOwnerId).get();
+        String? commentOwnerFcmToken = (commentOwnerDoc.data() as Map<String, dynamic>)['fcmToken'];
+
+        if (commentOwnerFcmToken != null) {
+          await notificationService.sendNotification(commentOwnerFcmToken, "$username liked your comment.", username);
+        }
       }
     }
   }

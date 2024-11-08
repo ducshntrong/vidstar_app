@@ -114,7 +114,17 @@ class NotificationService {
 
   Future<String> getAccessToken() async {
     final serviceAccountJson = {
-
+      "type": "service_account",
+      "project_id": "tiktok-clone-app-daf34",
+      "private_key_id": "6932c292c10cec29a49294493414a6e7d5809b73",
+      "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDqLn+bZBuskUhg\n1gleugjlAVK2oLZHmQRy84M1nTc0Af3tQTfXgcLVlz4t7zxO++7kpyLMMZpjXAq4\nuOU6bZhcR2A83IK5CTsp0vVx6jYd7KEEe0I0TO9WdLIbw645Fm3r6QYEPtU8RMNU\nBQwRqgGll4v1Bhcwwf8SvkRTc64zBujWxxjnizzwEapee/NkPEMB4NMsgV/Q/AG+\ngCQClJSpIeERjSfxGzUt6kQdGr2WSBBwTV9SyCSdNqVrF++RgfPHa2CsA9tGk6LK\nHF/g5rIJX6itgFiFSyzGR9DKsOGY6ZKou51xA4KvRv+C49+MMZ+1bQQ3nquxVTJk\nGg8w8D99AgMBAAECggEAOb64BBjyEwIrGwfEPTm55kBGhVaJRAvpEzBVRyPqgBZK\np1WI38j1QmZeNIT0tdQ9MuA8viWwGHaShTzAd4EdTAnkovVL/bUXQ+erUsjqScQ2\n6yw6pbtf3A1/+sUsgZK0jbLC40qcGZWqJZ5t/LATYmIFZqi3ELSRgW1t2zcf+iAt\n7h426MgtyTBliSPhRvrsa2QRmVZvawyA/krv2NXaNLv0bm9fmD5vwG10q9MGTvjZ\nJ+OTK1ZKwjs8SI5rIEh+RhLre3BGxHIiZRfBTLZKd1esAtGrm1w9NLbRJ+HwLTg5\nKytrNo3EZBigh4IZYQEx4wAiWf06gSnqxns0Eqg5sQKBgQD/qOlkrorX1VjMD/Te\nn3hrKe037s+nU1i7TU3x65X55mzf/UmA72wPSaysjstGWFm5naE50ee0kaauxjwL\nmnxYbuvENQt2hkvOEofJO+DsxaiLCZB4gizQx52jp9lUjD4Vg8aLSZEtWJ2TuPY1\nckEkOa0ttS+7g4nVDvV79L3PrQKBgQDqfkU6CdkwxUly38lBc4oRQWlZ7bsF/aYg\nPXOSFoYphHO2JbyEcWCC/UM96cqB4B69hsjp16X0MnwQAl8CpHeCVMbTNe78CEj1\nS5Fdz3TClM0L5fHrdQIlFuXOH9/MpmRQwzkIONUyMVXaHx7+Ad4HZyOzOph3Y+/3\niq3T3bXpEQKBgD9gKesxcW2rj4WWdwcw1PMLw6hX5NX/zUExGp9b3SPDwT2NVklG\nEK2Bf/KOu0lG4Ycn0i25IQ0cBgvRTFU8CJMLfBp5Y8wP4n7FDTAPTeSj4vIEfvHA\no0dmFGfbVf6lfUZsEi25IOnyy60w7qe1GPzX51wrTBfZtbNBMA14UA1JAoGBAIKZ\nGM0eNwxmlGWaJWiChN7fY2Fmecb4YdGK6Bbw3H+6+Qb1NW0+B9ZsX0rYLqTuwbAk\npTk3lYHPrDDuYSQDnVvFA4cWfqd3pcqX77ojlI/ad+ishHPykuM9QXfvYKGF+lDQ\nqa7emD6AI6R7uLMXLyVIWCW1+LxluHxRjEZ3MJ1BAoGBAJ6NoYxWDvZW29TEjdWV\nBM8svYV2sL3gHZfpurU6aqVo2rdd8CwK8sIG1rpYHBqT4elMMb5eru8URBppumbH\nGGRsAA/g9vW0pAgWrUycrPyxqlYOpOigY/eIY31fgwTAMJhdYnv/ICLP5/xFEuWU\nyax+4Y1GtrPIua7ju2qYqoDa\n-----END PRIVATE KEY-----\n",
+      "client_email": "firebase-adminsdk-z0xwd@tiktok-clone-app-daf34.iam.gserviceaccount.com",
+      "client_id": "113920812706969494946",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://oauth2.googleapis.com/token",
+      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+      "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-z0xwd%40tiktok-clone-app-daf34.iam.gserviceaccount.com",
+      "universe_domain": "googleapis.com"
     };
 
     List<String> scopes = [
@@ -146,7 +156,7 @@ class NotificationService {
   // Hàm gửi thông báo FCM sử dụng API V1
   Future<void> sendNotification(String receiverFcmToken, String message, String senderName) async {
     final String serverKey = await getAccessToken() ;
-    final String apiUrl = 'https://fcm.googleapis.com/v1/projects/your-project/messages:send'; // Địa chỉ API V1
+    final String apiUrl = 'https://fcm.googleapis.com/v1/projects/tiktok-clone-app-daf34/messages:send'; // Địa chỉ API V1
 
     final Map<String, dynamic> notificationData = {
       'message': {

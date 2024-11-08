@@ -106,7 +106,7 @@ class NotificationService {
       await firestore.collection('users').doc(authController.user.uid).update({
         'fcmToken': token,
       });
-      print('Token FCM đã được lưu thành công: $token');
+      print('Token FCM được lưu thành công: $token');
     } else {
       print('Không thể lấy token FCM.');
     }

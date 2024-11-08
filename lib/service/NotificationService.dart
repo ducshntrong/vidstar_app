@@ -114,7 +114,6 @@ class NotificationService {
   }
 
   Future<String> getAccessToken() async {
-    // Your client ID and client secret obtained from Google Cloud Console
     final serviceAccountJson = {
       "type": "service_account",
       "project_id": "tiktok-clone-app-daf34",

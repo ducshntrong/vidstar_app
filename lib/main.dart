@@ -26,10 +26,6 @@ void main() async {
 
   //Đăng ký ChatController với NotificationService
   Get.put(ChatController(notificationService));
-  // final _messaging = FirebaseMessaging.instance;
-  // await _messaging.requestPermission();
-  // final token = await _messaging.getToken();
-  // print('TokenFCM: $token');
 
   // final SentimentAnalysis commentApi = SentimentAnalysis('http://127.0.0.1:8000/predict_sentiment');
   // double sentiment = await commentApi.checkComment("bạn Đức đẹp trai quá");

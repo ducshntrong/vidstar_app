@@ -146,7 +146,7 @@ class NotificationService {
   // Hàm gửi thông báo FCM sử dụng API V1
   Future<void> sendNotification(String receiverFcmToken, String message, String senderName) async {
     final String serverKey = await getAccessToken() ;
-    final String apiUrl = 'https://fcm.googleapis.com/v1/projects/your-projectid/messages:send'; // Địa chỉ API V1
+    const String apiUrl = 'https://fcm.googleapis.com/v1/projects/tiktok-clone-app-daf34/messages:send'; // Địa chỉ API V1
 
     final Map<String, dynamic> notificationData = {
       'message': {

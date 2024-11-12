@@ -197,6 +197,31 @@ class AuthController extends GetxController {
       // Lấy thông tin người dùng hiện tại
       User currentFirebaseUser = firebaseAuth.currentUser!; // Lấy User từ Firebase
 
+      // Cập nhật tên trong tất cả bình luận của người dùng
+      if (name != null) {
+        // Lấy tất cả video mà người dùng đã bình luận
+        QuerySnapshot videoDocs = await firestore.collection('videos').get();
+        for (var videoDoc in videoDocs.docs) {
+          QuerySnapshot comments = await firestore
+              .collection('videos')
+              .doc(videoDoc.id)
+              .collection('comments')
+              .where('uid', isEqualTo: currentFirebaseUser
+              .uid) // Tìm bình luận của người dùng hiện tại
+              .get();
+
+          for (var comment in comments.docs) {
+            await firestore.collection('videos')
+                .doc(videoDoc.id)
+                .collection('comments')
+                .doc(comment.id)
+                .update({
+              'username': name, // Cập nhật tên trong bình luận
+            });
+          }
+        }
+      }
+
       // Lấy hình ảnh cũ từ Firestore
       DocumentSnapshot userDoc = await firestore.collection('users').doc(currentFirebaseUser.uid).get();
       String existingPhotoUrl = userDoc['profilePhoto'] ?? ''; // Lấy URL cũ
@@ -281,45 +306,6 @@ class AuthController extends GetxController {
       isLoading.value = false; // Kết thúc quá trình đăng nhập
     }
   }
-
-  // void loginUser(String email, String password) async {
-  //   try {
-  //     isLoading.value = true; // Bắt đầu quá trình đăng nhập
-  //     if (email.isNotEmpty && password.isNotEmpty) {
-  //       // Đăng nhập người dùng
-  //       UserCredential cred = await firebaseAuth.signInWithEmailAndPassword(
-  //         email: email,
-  //         password: password,
-  //       );
-  //
-  //       // Lấy token FCM mới
-  //       String? fcmToken = await FirebaseMessaging.instance.getToken();
-  //       if (fcmToken != null) {
-  //         // Cập nhật token FCM vào Firestore
-  //         await firestore.collection('users').doc(cred.user!.uid).update({
-  //           'fcmToken': fcmToken,
-  //         });
-  //       }
-  //
-  //       Get.snackbar(
-  //         'Login Successful',
-  //         'Welcome back!',
-  //       );
-  //     } else {
-  //       Get.snackbar(
-  //         'Error Logging in',
-  //         'Please enter all the fields',
-  //       );
-  //     }
-  //   } catch (e) {
-  //     Get.snackbar(
-  //       'Error Logging in',
-  //       e.toString(),
-  //     );
-  //   } finally {
-  //     isLoading.value = false; // Kết thúc quá trình đăng nhập
-  //   }
-  // }
 
   void signOut() async {
     await firebaseAuth.signOut();

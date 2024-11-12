@@ -18,19 +18,42 @@ class InboxScreen extends StatelessWidget {
       length: 2, // Số lượng tab
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.black87, // Nền tối cho AppBar
+          backgroundColor: Colors.black87,
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(0.0),
             child: Container(
               color: Colors.white10,
-              child: const TabBar(
+              child: TabBar(
                 tabs: [
-                  Tab(text: 'Notifications'),
-                  Tab(text: 'Messages'),
+                  const Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.notifications_none_outlined, color: Colors.white),
+                        SizedBox(width: 8),
+                        Text('Notifications', style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/msg.png',
+                          height: 25,
+                          width: 25,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Messages', style: TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
                 ],
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.grey,
-                indicatorColor: Color(0xFF4778FD),
+                indicatorColor: const Color(0xFF4778FD),
+                indicatorWeight: 1.0,
               ),
             ),
           ),

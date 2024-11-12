@@ -282,7 +282,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           SizedBox(
-                            height: 700,
+                            height: MediaQuery.of(context).size.height * 0.7,
                             child: Column(
                               children: [
                                 // Hiển thị chỉ số trang hiện tại
@@ -341,8 +341,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       }
 
                                       return GridView.builder(
-                                        shrinkWrap: true,
-                                        physics: const AlwaysScrollableScrollPhysics(),
+                                        shrinkWrap: true, // Giúp GridView chiếm không gian cần thiết
                                         itemCount: thumbnails.length,
                                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                           crossAxisCount: 2,

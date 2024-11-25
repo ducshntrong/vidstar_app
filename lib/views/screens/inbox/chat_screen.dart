@@ -8,6 +8,7 @@ import '../../../constants.dart';
 import '../../../controllers/chat_controller.dart';
 import '../../../models/message.dart';
 import '../../../models/user.dart';
+import '../profile_screen.dart';
 
 class ChatScreen extends StatefulWidget {
   final User user;
@@ -71,20 +72,40 @@ class _ChatScreenState extends State<ChatScreen> {
                     Navigator.of(context).pop();
                   },
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CircleAvatar(
-                    backgroundImage: NetworkImage(widget.user.profilePhoto),
+                GestureDetector(
+                  onTap: () {
+                    // Điều hướng đến trang cá nhân của người dùng
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ProfileScreen(uid: widget.user.uid),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(widget.user.profilePhoto),
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.user.name,
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                        overflow: TextOverflow.ellipsis,
+                      GestureDetector(
+                        onTap: () {
+                          // Điều hướng đến trang cá nhân của người dùng
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ProfileScreen(uid: widget.user.uid),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          widget.user.name,
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       StreamBuilder<User>(
                         stream: chatController.getUserStream(widget.user.uid),

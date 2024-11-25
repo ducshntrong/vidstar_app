@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:vidstar_app/constants.dart';
 import 'package:vidstar_app/views/screens/confirm_screen.dart';
 
+import 'VideoEditScreen.dart';
+
 class AddVideoScreen extends StatelessWidget {
   const AddVideoScreen({Key? key}) : super(key: key);
 
@@ -21,6 +23,19 @@ class AddVideoScreen extends StatelessWidget {
       );
     }
   }
+  // pickVideo(ImageSource src, BuildContext context) async {
+  //   final video = await ImagePicker().pickVideo(source: src);
+  //   if (video != null) {
+  //     Navigator.of(context).push(
+  //       MaterialPageRoute(
+  //         builder: (context) => VideoEditScreen(
+  //           videoFile: File(video.path),
+  //           videoPath: video.path,
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
 
   showOptionsDialog(BuildContext context) {
     return showDialog(

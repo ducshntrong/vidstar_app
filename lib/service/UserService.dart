@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserStatusService {
+class UserService {
   final FirebaseFirestore firestore;
   final String userId;
 
-  UserStatusService(this.firestore, this.userId);
+  UserService(this.firestore, this.userId);
 
   Future<void> setOnline() async {
     await firestore.collection('users').doc(userId).update({
@@ -18,5 +18,19 @@ class UserStatusService {
       'isOnline': false,
       'lastSeen': FieldValue.serverTimestamp(),
     });
+  }
+
+
+  Future<Map<String, dynamic>?> getUserData(String uid) async {
+    try {
+      DocumentSnapshot snapshot = await firestore.collection('users').doc(uid).get();
+      if (snapshot.exists) {
+        return snapshot.data() as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching user data: $e');
+      return null;
+    }
   }
 }

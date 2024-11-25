@@ -11,6 +11,7 @@ import 'package:vidstar_app/views/screens/profile_screen.dart';
 import 'package:vidstar_app/constants.dart';
 import '../../models/comment.dart';
 import '../../service/NotificationService.dart';
+import '../../service/UserService.dart';
 import '../widgets/CommentWidget.dart';
 
 class CommentBottomSheet extends StatefulWidget {
@@ -215,48 +216,63 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                   final comment = commentController.comments[index];
 
                   if (comment.parentId == null || comment.parentId!.isEmpty) {
-                    return GestureDetector(
-                      onLongPress: () {
-                        HapticFeedback.mediumImpact();
-                        showCommentOptions(context, comment);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CommentWidget(
-                              username: comment.username,
-                              profilePhoto: comment.profilePhoto,
-                              comment: comment.comment,
-                              datePublished: comment.datePublished.toDate(),
-                              onReply: () {
-                                setState(() {
-                                  replyingToCommentId = comment.id;
-                                  _commentController.clear();
-                                });
-                                _focusNode.requestFocus();
-                                Future.delayed(Duration(milliseconds: 100), () {
-                                  _scrollController.animateTo(
-                                    _scrollController.position.maxScrollExtent,
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
-                                  );
-                                });
-                              },
-                              onLike: () => commentController.likeComment(comment.id),
-                              uid: comment.uid,
-                              likes: List<String>.from(comment.likes),
-                              authorId: widget.uid,
+                    return FutureBuilder<Map<String, dynamic>?>(
+                      future: UserService(firestore, comment.uid).getUserData(comment.uid),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const Center(child: Text('Error fetching user data'));
+                        }
+
+                        if (!snapshot.hasData || snapshot.data == null) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        final userData = snapshot.data!;
+
+                        return GestureDetector(
+                          onLongPress: () {
+                            HapticFeedback.mediumImpact();
+                            showCommentOptions(context, comment);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CommentWidget(
+                                  username: userData['name'],
+                                  profilePhoto: userData['profilePhoto'],
+                                  comment: comment.comment,
+                                  datePublished: comment.datePublished.toDate(),
+                                  onReply: () {
+                                    setState(() {
+                                      replyingToCommentId = comment.id;
+                                      _commentController.clear();
+                                    });
+                                    _focusNode.requestFocus();
+                                    Future.delayed(Duration(milliseconds: 100), () {
+                                      _scrollController.animateTo(
+                                        _scrollController.position.maxScrollExtent,
+                                        duration: const Duration(milliseconds: 300),
+                                        curve: Curves.easeOut,
+                                      );
+                                    });
+                                  },
+                                  onLike: () => commentController.likeComment(comment.id),
+                                  uid: comment.uid,
+                                  likes: List<String>.from(comment.likes),
+                                  authorId: widget.uid,
+                                ),
+                                buildReplies(comment.id), // Hiển thị bình luận con
+                              ],
                             ),
-                            buildReplies(comment.id), // Hiển thị bình luận con
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     );
                   }
 
-                  return SizedBox.shrink(); // k hiển thị nếu k phải bình luận cha
+                  return SizedBox.shrink(); // không hiển thị nếu không phải bình luận cha
                 },
               );
             }),
@@ -376,43 +392,66 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return SizedBox.shrink();
         }
+
         List<Comment> replies = snapshot.data!.docs.map((doc) => Comment.fromSnap(doc)).toList();
+
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: replies.length,
           itemBuilder: (context, index) {
             Comment reply = replies[index];
-            return GestureDetector(
-              onLongPress: () {
-                HapticFeedback.mediumImpact();
-                showCommentOptions(context, reply); // Truyền bình luận con
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(left: 40.0),
-                child: CommentWidget(
-                  username: reply.username,
-                  profilePhoto: reply.profilePhoto,
-                  comment: reply.comment,
-                  datePublished: reply.datePublished.toDate(),
-                  onReply: () {
-                    replyingToCommentId = reply.id;
-                    _focusNode.requestFocus();
-                    Future.delayed(Duration(milliseconds: 100), () {
-                      _scrollController.animateTo(
-                        _scrollController.position.maxScrollExtent,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
-                      );
-                    });
+
+            // Tạo một UserStatusService cho từng bình luận con
+            UserService userService = UserService(firestore, reply.uid);
+
+            return FutureBuilder<Map<String, dynamic>?>(
+              future: userService.getUserData(reply.uid),
+              builder: (context, userSnapshot) {
+                if (userSnapshot.hasError) {
+                  return const Center(child: Text('Error fetching user data'));
+                }
+
+                if (!userSnapshot.hasData || userSnapshot.data == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final userData = userSnapshot.data!;
+
+                return GestureDetector(
+                  onLongPress: () {
+                    HapticFeedback.mediumImpact();
+                    showCommentOptions(context, reply); // Truyền bình luận con
                   },
-                  onLike: () => commentController.likeComment(reply.id),
-                  uid: reply.uid,
-                  likes: List<String>.from(reply.likes),
-                  isReply: true,
-                  authorId: widget.uid,
-                ),
-              ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 40.0),
+                    child: CommentWidget(
+                      username: userData['name'], // Lấy tên từ userData
+                      profilePhoto: userData['profilePhoto'], // Lấy ảnh đại diện từ userData
+                      comment: reply.comment,
+                      datePublished: reply.datePublished.toDate(),
+                      onReply: () {
+                        setState(() {
+                          replyingToCommentId = reply.id;
+                          _focusNode.requestFocus();
+                        });
+                        Future.delayed(Duration(milliseconds: 100), () {
+                          _scrollController.animateTo(
+                            _scrollController.position.maxScrollExtent,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        });
+                      },
+                      onLike: () => commentController.likeComment(reply.id),
+                      uid: reply.uid,
+                      likes: List<String>.from(reply.likes),
+                      isReply: true,
+                      authorId: widget.uid,
+                    ),
+                  ),
+                );
+              },
             );
           },
         );

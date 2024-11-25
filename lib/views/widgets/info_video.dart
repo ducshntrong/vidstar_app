@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:vidstar_app/constants.dart';
 
 import '../../models/video.dart';
+import '../../service/UserService.dart';
 import '../screens/profile_screen.dart';
 
 class CaptionWidget extends StatefulWidget {

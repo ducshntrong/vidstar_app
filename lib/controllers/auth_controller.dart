@@ -197,31 +197,6 @@ class AuthController extends GetxController {
       // Lấy thông tin người dùng hiện tại
       User currentFirebaseUser = firebaseAuth.currentUser!; // Lấy User từ Firebase
 
-      // Cập nhật tên trong tất cả bình luận của người dùng
-      if (name != null) {
-        // Lấy tất cả video mà người dùng đã bình luận
-        QuerySnapshot videoDocs = await firestore.collection('videos').get();
-        for (var videoDoc in videoDocs.docs) {
-          QuerySnapshot comments = await firestore
-              .collection('videos')
-              .doc(videoDoc.id)
-              .collection('comments')
-              .where('uid', isEqualTo: currentFirebaseUser
-              .uid) // Tìm bình luận của người dùng hiện tại
-              .get();
-
-          for (var comment in comments.docs) {
-            await firestore.collection('videos')
-                .doc(videoDoc.id)
-                .collection('comments')
-                .doc(comment.id)
-                .update({
-              'username': name, // Cập nhật tên trong bình luận
-            });
-          }
-        }
-      }
-
       // Lấy hình ảnh cũ từ Firestore
       DocumentSnapshot userDoc = await firestore.collection('users').doc(currentFirebaseUser.uid).get();
       String existingPhotoUrl = userDoc['profilePhoto'] ?? ''; // Lấy URL cũ
@@ -243,30 +218,6 @@ class AuthController extends GetxController {
             'username': name, // Cập nhật tên user trong video
           });
         }
-      }
-      // Cập nhật tên trong danh sách followers
-      QuerySnapshot followersDocs = await firestore
-          .collection('users')//lấy list những ng theo dõi user hiện tại
-          .doc(currentFirebaseUser.uid)
-          .collection('followers')
-          .get();
-      for (var doc in followersDocs.docs) {
-        //update tên của user hiện tại trong danh sách following của từng follower
-        await firestore.collection('users').doc(doc.id).collection('following').doc(currentFirebaseUser.uid).update({
-          'name': name, // Cập nhật tên user trong ds followers
-        });
-      }
-
-      // Cập nhật tên trong danh sách following
-      QuerySnapshot followingDocs = await firestore
-          .collection('users')
-          .doc(currentFirebaseUser.uid)
-          .collection('following')
-          .get();
-      for (var doc in followingDocs.docs) {
-        await firestore.collection('users').doc(doc.id).collection('followers').doc(currentFirebaseUser.uid).update({
-          'name': name, // Cập nhật tên user trong danh sách following
-        });
       }
 
       // Cập nhật tên user trong tất cả thông báo
@@ -333,3 +284,63 @@ class AuthController extends GetxController {
     }
   }
 }
+
+// Cập nhật tên trong tất cả bình luận của người dùng
+// if (name != null) {
+//   // Lấy tất cả video mà người dùng đã bình luận
+//   QuerySnapshot videoDocs = await firestore.collection('videos').get();
+//   for (var videoDoc in videoDocs.docs) {
+//     QuerySnapshot comments = await firestore
+//         .collection('videos')
+//         .doc(videoDoc.id)
+//         .collection('comments')
+//         .where('uid', isEqualTo: currentFirebaseUser
+//         .uid) // Tìm bình luận của người dùng hiện tại
+//         .get();
+//
+//     for (var comment in comments.docs) {
+//       await firestore.collection('videos')
+//           .doc(videoDoc.id)
+//           .collection('comments')
+//           .doc(comment.id)
+//           .update({
+//         'username': name, // Cập nhật tên trong bình luận
+//       });
+//     }
+//   }
+// }
+
+// // Cập nhật tên trong danh sách followers
+// QuerySnapshot followersDocs = await firestore
+//     .collection('users')//lấy list những ng theo dõi user hiện tại
+//     .doc(currentFirebaseUser.uid)
+//     .collection('followers')
+//     .get();
+// for (var doc in followersDocs.docs) {
+//   //update tên của user hiện tại trong danh sách following của từng follower
+//   await firestore.collection('users').doc(doc.id).collection('following').doc(currentFirebaseUser.uid).update({
+//     'name': name, // Cập nhật tên user trong ds followers
+//   });
+// }
+//
+// // Cập nhật tên trong danh sách following
+// QuerySnapshot followingDocs = await firestore
+//     .collection('users')
+//     .doc(currentFirebaseUser.uid)
+//     .collection('following')
+//     .get();
+// for (var doc in followingDocs.docs) {
+//   await firestore.collection('users').doc(doc.id).collection('followers').doc(currentFirebaseUser.uid).update({
+//     'name': name, // Cập nhật tên user trong danh sách following
+//   });
+// }
+
+// update tên người dùng trong all video của user
+// if (name != null) {
+//   QuerySnapshot videoDocs = await firestore.collection('videos').where('uid', isEqualTo: currentFirebaseUser.uid).get();
+//   for (var doc in videoDocs.docs) {
+//     await firestore.collection('videos').doc(doc.id).update({
+//       'username': name, // Cập nhật tên user trong video
+//     });
+//   }
+// }

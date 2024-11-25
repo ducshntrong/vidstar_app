@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:vidstar_app/constants.dart';
 import 'package:vidstar_app/controllers/search_controller.dart';
 import 'package:get/get.dart';
 import 'package:vidstar_app/models/user.dart';
 import 'package:vidstar_app/views/screens/profile_screen.dart';
 import 'package:vidstar_app/views/screens/video_screen2.dart';
+
+import '../../service/UserService.dart';
 
 class SearchScreen extends StatelessWidget {
   SearchScreen({Key? key}) : super(key: key);
@@ -63,39 +66,28 @@ class SearchScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: SingleChildScrollView( // Thêm SingleChildScrollView
-          child: Column(
-            children: [
-              // Danh sách người dùng tìm kiếm
-              if (searchController.searchedUsers.isNotEmpty) ...[
-                // Sử dụng ListView.builder để có thể cuộn
-                ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(), // Ngăn chặn cuộn của ListView
-                  shrinkWrap: true, // Giúp ListView chiếm không gian cần thiết
-                  itemCount: searchController.searchedUsers.length,
-                  itemBuilder: (context, index) {
-                    final user = searchController.searchedUsers[index];
-                    return InkWell(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => ProfileScreen(uid: user.uid),
-                        ),
-                      ),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(user.profilePhoto),
-                        ),
-                        title: Text(user.name),
-                      ),
-                    );
-                  },
-                ),
-              ],
-              // Danh sách video tìm kiếm
-              if (searchController.searchedVideos.isNotEmpty) ...[
-                GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(), // Ngăn chặn cuộn của GridView
-                  shrinkWrap: true, // Giúp GridView chiếm không gian cần thiết
+        body: Column(
+          children: [
+            if (searchController.searchedUsers.isNotEmpty) ...[
+              ...searchController.searchedUsers.map((user) {
+                return InkWell(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => ProfileScreen(uid: user.uid),
+                    ),
+                  ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(user.profilePhoto),
+                    ),
+                    title: Text(user.name),
+                  ),
+                );
+              }).toList(),
+            ],
+            if (searchController.searchedVideos.isNotEmpty) ...[
+              Expanded(
+                child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: 0.58,
@@ -181,18 +173,18 @@ class SearchScreen extends StatelessWidget {
                     );
                   },
                 ),
-              ],
-              // Thông báo không có kết quả
-              if (searchController.searchedUsers.isEmpty && searchController.searchedVideos.isEmpty) ...[
-                const Center(
-                  child: Text(
-                    'No results found!',
-                    style: TextStyle(fontSize: 25, color: Colors.white),
-                  ),
-                ),
-              ],
+              ),
             ],
-          ),
+            if (searchController.searchedUsers.isEmpty &&
+                searchController.searchedVideos.isEmpty) ...[
+              const Center(
+                child: Text(
+                  'No results found!',
+                  style: TextStyle(fontSize: 25, color: Colors.white),
+                ),
+              ),
+            ],
+          ],
         ),
       );
     });

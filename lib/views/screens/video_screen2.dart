@@ -150,7 +150,7 @@ class _VideoScreenState extends State<VideoScreen2> {
                                 _buildCommentButton(data),
                                 _buildShareButton(data),
                                 CircleAnimation(
-                                  child: buildMusicAlbum(data.profilePhoto),
+                                  child: buildMusicAlbum(data.thumbnail),
                                 ),
                               ],
                             ),

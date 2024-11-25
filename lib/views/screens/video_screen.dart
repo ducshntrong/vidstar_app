@@ -288,7 +288,7 @@ class _VideoScreenState extends State<VideoScreen> {
                             ],
                           ),
                           CircleAnimation(
-                            child: buildMusicAlbum(data.profilePhoto),
+                            child: buildMusicAlbum(data.thumbnail),
                           ),
                         ],
                       ),
